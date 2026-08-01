@@ -1,0 +1,4177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="WaterTik v5.0 - Download TikTok Tanpa Watermark, Generator Foto, Convert MP3, Misi Ramadhan">
+    <meta name="author" content="Fikri">
+    <title>WaterTik v5.0 - Misi Ramadhan</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- FingerprintJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9783625787750233" crossorigin="anonymous"></script>
+    
+    <!-- Config - API Key dari environment -->
+    <script src="js/config.js"></script>
+    
+    <style>
+        /* ========================================
+           GLOBAL STYLES & RESET
+        ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --bg-primary: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 50%, #0d1a3a 100%);
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --border: rgba(0, 242, 254, 0.2);
+            --accent: #00f2fe;
+            --accent-grad: linear-gradient(135deg, #00f2fe, #2196F3);
+            --btn-danger: linear-gradient(135deg, #ff0050, #ff0080);
+            --text: #ffffff;
+            --ai-bot: rgba(255, 215, 0, 0.15);
+            --ai-user: rgba(0, 242, 254, 0.2);
+        }
+        
+        body.ramadhan {
+            --bg-primary: linear-gradient(135deg, #0a2e1a 0%, #1a4a2e 50%, #0d2a1a 100%);
+            --border: rgba(255, 215, 0, 0.3);
+            --accent: #FFD700;
+            --accent-grad: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        body.lebaran {
+            --bg-primary: linear-gradient(135deg, #1a2e3a 0%, #2a4a3e 50%, #1a3a2a 100%);
+            --border: rgba(76, 175, 80, 0.3);
+            --accent: #4CAF50;
+            --accent-grad: linear-gradient(135deg, #4CAF50, #8BC34A);
+        }
+        
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text);
+            padding-bottom: 75px;
+            transition: all 0.3s ease;
+        }
+        
+        /* ========================================
+           OVERLAYS
+        ======================================== */
+        .maintenance-overlay, .blocked-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .maintenance-overlay.active, .blocked-overlay.active {
+            display: flex;
+        }
+        
+        .maintenance-overlay {
+            background: linear-gradient(135deg, #0a0a2e, #1a1a2e);
+        }
+        
+        .maintenance-overlay i {
+            font-size: 80px;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+        
+        .maintenance-overlay h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .maintenance-overlay p {
+            color: #aaaaaa;
+            margin-bottom: 20px;
+        }
+        
+        .blocked-overlay {
+            background: linear-gradient(135deg, #2a0a0a, #1a0a0a);
+        }
+        
+        .blocked-overlay i {
+            font-size: 80px;
+            color: #ff0050;
+            margin-bottom: 20px;
+        }
+        
+        .blocked-overlay h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ff0050;
+        }
+        
+        /* ========================================
+           CONTAINER & TABS
+        ======================================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .main-tab {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .main-tab.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ========================================
+           CARD
+        ======================================== */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .card h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+        }
+        
+        /* ========================================
+           BOTTOM NAV
+        ======================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 20, 30, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 8px 10px 18px;
+            z-index: 2000;
+            border-top: 1px solid var(--border);
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            gap: 5px;
+        }
+        
+        .bottom-nav::-webkit-scrollbar {
+            height: 3px;
+        }
+        
+        .bottom-nav::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .bottom-nav::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        
+        .nav-item {
+            flex-shrink: 0;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: transparent;
+            border: none;
+            color: #888888;
+            font-size: 10px;
+            cursor: pointer;
+            padding: 5px 12px;
+            border-radius: 30px;
+            min-width: 65px;
+            transition: all 0.3s;
+        }
+        
+        .nav-item i {
+            font-size: 20px;
+        }
+        
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(0, 242, 254, 0.1);
+        }
+        
+        body.ramadhan .nav-item.active {
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        /* ========================================
+           PROFILE CARD
+        ======================================== */
+        .profile-card {
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.15), rgba(0, 242, 254, 0.1));
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 0, 80, 0.25), rgba(0, 242, 254, 0.2));
+        }
+        
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-grad);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 28px;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-text h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .profile-text p {
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+        
+        .profile-stats-mini {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .profile-stats-mini .stat-item {
+            text-align: center;
+        }
+        
+        .profile-stats-mini .number {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .profile-stats-mini .label {
+            font-size: 10px;
+            color: #aaaaaa;
+        }
+        
+        /* ========================================
+           BUTTONS
+        ======================================== */
+        .btn {
+            padding: 12px 20px;
+            background: var(--btn-danger);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary {
+            background: var(--accent-grad);
+            color: #1a1a2e;
+        }
+        
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-premium {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #1a1a2e;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* ========================================
+           INPUTS
+        ======================================== */
+        .url-input, .file-input, .login-input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #333333;
+            border-radius: 15px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .url-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        /* ========================================
+           STATS
+        ======================================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        /* ========================================
+           VIDEO PREVIEW
+        ======================================== */
+        .video-preview {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 600px) {
+            .video-preview {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            border-radius: 18px;
+            background: #1a1a2e;
+        }
+        
+        .info-detail {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        /* ========================================
+           QUALITY BUTTONS
+        ======================================== */
+        .quality-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        
+        .quality-btn {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #333333;
+            border-radius: 30px;
+            color: #aaaaaa;
+            cursor: pointer;
+        }
+        
+        .quality-btn.active {
+            background: var(--accent-grad);
+            color: white;
+            border: none;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        /* ========================================
+           RESULT BOX
+        ======================================== */
+        .result-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 25px;
+            display: none;
+            border: 1px solid var(--border);
+        }
+        
+        .result-box.active {
+            display: block;
+        }
+        
+        /* ========================================
+           GALLERY
+        ======================================== */
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            cursor: pointer;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .gallery-item:hover {
+            border-color: var(--accent);
+            transform: scale(1.02);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+            background: #1a1a2e;
+        }
+        
+        .frame-time {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: var(--accent);
+        }
+        
+        .download-single {
+            position: absolute;
+            bottom: 45px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .download-single:hover {
+            background: var(--accent);
+            color: #1a1a2e;
+        }
+        
+        /* ========================================
+           MP3 PLAYER
+        ======================================== */
+        .audio-player {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 60px;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        
+        .audio-player audio {
+            width: 100%;
+        }
+        
+        .mp3-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .mp3-info-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .mp3-info-card .label {
+            font-size: 10px;
+            color: #aaaaaa;
+            margin-bottom: 5px;
+        }
+        
+        .mp3-info-card .value {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        /* ========================================
+           WATERMARK IMAGE
+        ======================================== */
+        .watermark-image {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 18px;
+            margin: 15px auto;
+            display: block;
+            border: 2px solid var(--border);
+            cursor: pointer;
+        }
+        
+        /* ========================================
+           MISSION
+        ======================================== */
+        .mission-progress {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: var(--accent-grad);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .mission-status {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        .mission-countdown, .mission-lebaran, .mission-disabled, .mission-full {
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .mission-countdown i, .mission-lebaran i, .mission-disabled i, .mission-full i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .mission-full {
+            background: rgba(255, 0, 80, 0.2);
+            border: 1px solid #ff0050;
+        }
+        
+        .mission-login-warning {
+            background: rgba(255, 0, 80, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        /* ========================================
+           RAMADHAN HEADER
+        ======================================== */
+        .ramadhan-header {
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+        
+        .ramadhan-countdown {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .ramadhan-message {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        /* ========================================
+           ADS
+        ======================================== */
+        .ad-banner-wrapper {
+            margin: 10px auto;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        
+        .ad-banner-wrapper ins {
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .ad-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            border: 1px dashed var(--accent);
+        }
+        
+        .ad-container.hidden {
+            display: none;
+        }
+        
+        /* ========================================
+           WINNERS
+        ======================================== */
+        .winners-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .winner-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .winner-item:last-child {
+            border-bottom: none;
+        }
+        
+        .prize-info {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.1));
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .prize-1 { color: #FFD700; font-size: 16px; font-weight: bold; }
+        .prize-2 { color: #C0C0C0; font-size: 14px; font-weight: bold; }
+        .prize-3 { color: #CD7F32; font-size: 14px; font-weight: bold; }
+        
+        /* ========================================
+           POPUPS
+        ======================================== */
+        .ban-popup-overlay, .winner-popup-overlay, .kontak-popup,
+        .dashboard-modal, .premium-modal, .ramadhan-start-popup,
+        .report-bug-modal, .notification-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10001;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .notification-popup.active, .ramadhan-start-popup.active,
+        .ban-popup-overlay.active, .winner-popup-overlay.active,
+        .kontak-popup.active, .dashboard-modal.active,
+        .premium-modal.active, .report-bug-modal.active {
+            display: flex;
+        }
+        
+        .notification-content, .ramadhan-popup-content, .ban-popup-content,
+        .winner-popup-content, .popup-content, .report-bug-content {
+            background: linear-gradient(135deg, #1a1a3a, #0d1a3a);
+            border-radius: 30px;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid var(--accent);
+            animation: bounceIn 0.5s ease;
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* ========================================
+           PAYMENT
+        ======================================== */
+        .payment-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            padding: 5px 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #1a1a2e;
+        }
+        
+        .wa-contact {
+            background: rgba(37, 211, 102, 0.15);
+            border: 1px solid #25D366;
+            border-radius: 60px;
+            padding: 12px 18px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .wa-button-popup {
+            background: #25D366;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .close-popup {
+            background: #ff0050;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        /* ========================================
+           TOAST
+        ======================================== */
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #1a1a2e;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 9999;
+            font-weight: bold;
+            white-space: nowrap;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        
+        /* ========================================
+           LOADING
+        ======================================== */
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .loading-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ========================================
+           FOOTER
+        ======================================== */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: #888888;
+            font-size: 12px;
+        }
+        
+        /* ========================================
+           INFO
+        ======================================== */
+        .info-subnav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .info-subnav button {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #aaaaaa;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .info-subnav button.active {
+            background: var(--accent-grad);
+            color: #1a1a2e;
+        }
+        
+        .info-page {
+            display: none;
+        }
+        
+        .info-page.active-page {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .info-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+        }
+        
+        .info-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .info-item i {
+            width: 30px;
+            color: var(--accent);
+        }
+        
+        .history-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* ========================================
+           FEATURES
+        ======================================== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature-card i {
+            font-size: 28px;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        /* ========================================
+           USER INFO
+        ======================================== */
+        .user-info {
+            background: rgba(0, 242, 254, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        body.ramadhan .user-info {
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        .avatar-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent-grad);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-size: 40px;
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .user-id-display {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 10px 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-left: 3px solid var(--accent);
+        }
+        
+        .user-id-label {
+            font-size: 12px;
+            color: #aaaaaa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .user-id-value {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+        }
+        
+        .copy-id-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .copy-id-btn:hover {
+            background: var(--accent);
+            color: #1a1a2e;
+        }
+        
+        /* ========================================
+           AI CHAT
+        ======================================== */
+        .ai-chat-container {
+            height: 450px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .ai-chat-container::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .ai-chat-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .ai-chat-container::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        
+        .ai-message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 88%;
+            word-wrap: break-word;
+            animation: messageIn 0.3s ease;
+        }
+        
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ai-message.user {
+            background: var(--ai-user);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+        
+        .ai-message.bot {
+            background: var(--ai-bot);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+        
+        .ai-message .msg-header {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ai-message .msg-header .ai-icon {
+            font-size: 16px;
+        }
+        
+        .ai-message .msg-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .ai-quick-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .ai-quick-btn {
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            color: #cccccc;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .ai-quick-btn:hover {
+            background: var(--accent-grad);
+            color: #1a1a2e;
+            border-color: transparent;
+        }
+        
+        .ai-clear-btn {
+            background: rgba(255, 0, 80, 0.2);
+            border: 1px solid rgba(255, 0, 80, 0.3);
+            color: #ff0050;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .ai-clear-btn:hover {
+            background: rgba(255, 0, 80, 0.3);
+        }
+        
+        .ai-typing {
+            display: none;
+            padding: 12px 16px;
+            background: var(--ai-bot);
+            border-radius: 18px;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            color: #aaaaaa;
+            font-size: 13px;
+        }
+        
+        .ai-typing .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin: 0 2px;
+            animation: typingDot 1.4s infinite both;
+        }
+        
+        .ai-typing .dot:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing .dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typingDot {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .ai-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .ai-feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+        }
+        
+        .ai-feature-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .ai-feature-item i {
+            font-size: 20px;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .ai-feature-item span {
+            font-size: 11px;
+            color: #aaaaaa;
+        }
+        
+        .ai-rate-limit {
+            background: rgba(255, 165, 0, 0.15);
+            border: 1px solid #FFA500;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #FFA500;
+            text-align: center;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .ai-rate-limit.active {
+            display: block;
+        }
+        
+        /* ========================================
+           COMING SOON - INSTAGRAM
+        ======================================== */
+        .coming-soon-container {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(225, 48, 108, 0.1), rgba(255, 48, 108, 0.05));
+            border-radius: 25px;
+            border: 2px dashed rgba(225, 48, 108, 0.3);
+            animation: pulse-border 2s infinite;
+        }
+        
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(225, 48, 108, 0.3); }
+            50% { border-color: rgba(225, 48, 108, 0.6); }
+        }
+        
+        .coming-soon-icon {
+            font-size: 80px;
+            color: #E1306C;
+            margin-bottom: 20px;
+            animation: bounce-icon 2s infinite;
+        }
+        
+        @keyframes bounce-icon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .coming-soon-content h3 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #E1306C, #F56040);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .coming-soon-content p {
+            color: #aaaaaa;
+            margin-bottom: 5px;
+        }
+        
+        .coming-soon-features {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .coming-soon-features li {
+            padding: 8px 12px;
+            background: rgba(225, 48, 108, 0.1);
+            border-radius: 10px;
+            color: #dddddd;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .coming-soon-features li i {
+            color: #4CAF50;
+            font-size: 14px;
+        }
+        
+        .coming-soon-notify {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 15px;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .coming-soon-notify p {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        .coming-soon-progress {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        
+        .coming-soon-progress .progress-label {
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-bottom: 8px;
+        }
+        
+        .coming-soon-progress .progress-container {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .coming-soon-progress .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #E1306C, #F56040);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+        
+        .coming-soon-progress .progress-text {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #E1306C;
+        }
+        
+        @media (max-width: 600px) {
+            .coming-soon-features {
+                grid-template-columns: 1fr;
+            }
+            .coming-soon-icon {
+                font-size: 60px;
+            }
+            .coming-soon-content h3 {
+                font-size: 22px;
+            }
+        }
+        
+        /* ========================================
+           VERSION BADGE & SYNC
+        ======================================== */
+        .version-badge {
+            position: fixed;
+            bottom: 75px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 9px;
+            color: #aaaaaa;
+            z-index: 99;
+        }
+        
+        .sync-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            z-index: 1000;
+        }
+        
+        .sync-status.synced { background: #4CAF50; }
+        .sync-status.syncing { background: #FF9800; }
+        .sync-status.error { background: #f44336; }
+        
+        /* ========================================
+           REPORT BUG
+        ======================================== */
+        .report-bug-btn {
+            position: fixed;
+            bottom: 95px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff0050, #ff0080);
+            border: none;
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .report-bug-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .report-form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        
+        .report-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+        
+        .report-form-group input,
+        .report-form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333333;
+            border-radius: 10px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        .report-form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .report-submit-btn {
+            background: var(--accent-grad);
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .headset-icon-modal {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        
+        .multiple-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .bottom-nav .nav-item {
+                min-width: 50px;
+                padding: 5px 8px;
+                font-size: 9px;
+            }
+            .bottom-nav .nav-item i {
+                font-size: 16px;
+            }
+            .profile-stats-mini {
+                gap: 15px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================
+         VERSION BADGE
+    ======================================== -->
+    <div class="version-badge">
+        <i class="fas fa-code-branch"></i> WaterTik v5.0 | Ramadhan 2026
+    </div>
+    
+    <!-- ========================================
+         SYNC STATUS
+    ======================================== -->
+    <div id="syncStatus" class="sync-status">🔌 Menghubungkan...</div>
+    
+    <!-- ========================================
+         MAINTENANCE OVERLAY
+    ======================================== -->
+    <div id="maintenanceOverlay" class="maintenance-overlay">
+        <i class="fas fa-moon"></i>
+        <h1>🌙 Sedang dalam Perbaikan</h1>
+        <p>Maaf, WaterTik sedang dalam masa pemeliharaan.</p>
+        <p>Kami akan segera kembali dengan fitur yang lebih baik!</p>
+        <p>Mohon doa dan dukungannya ya. Terima kasih 🙏</p>
+        <p id="maintenanceMessage" style="margin-top: 20px; color: #FFD700;">InsyaAllah kembali segera 🌙</p>
+    </div>
+    
+    <!-- ========================================
+         BLOCKED OVERLAY
+    ======================================== -->
+    <div id="blockedOverlay" class="blocked-overlay">
+        <i class="fas fa-ban"></i>
+        <h1>⚠️ AKUN DIBLOKIR ⚠️</h1>
+        <p id="blockedReason">Akun Anda telah diblokir oleh admin.</p>
+        <p>Silakan hubungi admin untuk informasi lebih lanjut.</p>
+        <div class="wa-contact" style="margin-top: 15px; justify-content: center;">
+            <span>Admin WaterTik</span>
+            <span>089699024654</span>
+            <a href="https://wa.me/6289699024654" class="wa-button-popup" target="_blank">Chat</a>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         ADSENSE BANNER
+    ======================================== -->
+    <div class="ad-banner-wrapper">
+        <ins class="adsbygoogle"
+             style="display: block"
+             data-ad-client="ca-pub-9783625787750233"
+             data-ad-slot="6380078265"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+    
+    <!-- ========================================
+         REPORT BUG BUTTON
+    ======================================== -->
+    <button class="report-bug-btn" id="reportBugBtn">
+        <i class="fas fa-headset"></i>
+    </button>
+    
+    <!-- ========================================
+         REPORT BUG MODAL
+    ======================================== -->
+    <div id="reportBugModal" class="report-bug-modal">
+        <div class="report-bug-content">
+            <div class="headset-icon-modal">
+                <i class="fas fa-headset" style="font-size: 55px; color: var(--accent);"></i>
+            </div>
+            <h2>🐞 Laporkan Bug</h2>
+            <p style="font-size: 12px; color: #aaaaaa; margin-bottom: 20px;">Laporkan masalah yang Anda temukan di WaterTik</p>
+            
+            <div class="report-form-group">
+                <label>Nama / Pelapor <span style="color: red;">*</span></label>
+                <input type="text" id="reportName" placeholder="Masukkan nama Anda">
+            </div>
+            
+            <div class="report-form-group">
+                <label>Judul Bug <span style="color: red;">*</span></label>
+                <input type="text" id="reportTitle" placeholder="Contoh: Tombol download tidak berfungsi">
+            </div>
+            
+            <div class="report-form-group">
+                <label>Deskripsi Bug <span style="color: red;">*</span></label>
+                <textarea id="reportDesc" placeholder="Jelaskan bug secara detail...&#10;Langkah-langkah untuk mereproduksi:&#10;1. ...&#10;2. ..."></textarea>
+            </div>
+            
+            <div class="report-form-group">
+                <label>Browser & OS</label>
+                <input type="text" id="reportSystem" placeholder="Contoh: Chrome 120, Windows 11">
+            </div>
+            
+            <button class="report-submit-btn" id="sendReportBtn">
+                <i class="fas fa-envelope"></i> Kirim Laporan ke dllweb9@gmail.com
+            </button>
+            <button class="close-popup" onclick="closeReportModal()" style="margin-top: 15px; background: #333333;">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         NOTIFICATION POPUP
+    ======================================== -->
+    <div id="notificationPopup" class="notification-popup">
+        <div class="notification-content">
+            <i class="fas fa-bell" style="font-size: 48px; color: var(--accent); margin-bottom: 15px;"></i>
+            <h2 id="notificationTitle">Notifikasi</h2>
+            <p id="notificationMessage" style="margin: 15px 0;"></p>
+            <button class="close-popup" onclick="closeNotificationPopup()">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         BOTTOM NAVIGATION - LENGKAP 10 TOMBOL
+    ======================================== -->
+    <div class="bottom-nav">
+        <button class="nav-item active" data-nav="home" onclick="switchTab('home')">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button class="nav-item" data-nav="generator" onclick="switchTab('generator')">
+            <i class="fas fa-images"></i>
+            <span>Generator</span>
+        </button>
+        <button class="nav-item" data-nav="audio" onclick="switchTab('audio')">
+            <i class="fas fa-music"></i>
+            <span>MP3</span>
+        </button>
+        <button class="nav-item" data-nav="ig" onclick="switchTab('ig')">
+            <i class="fab fa-instagram"></i>
+            <span>IG</span>
+        </button>
+        <button class="nav-item" data-nav="ai" onclick="switchTab('ai')">
+            <i class="fas fa-robot"></i>
+            <span>AI</span>
+        </button>
+        <button class="nav-item" data-nav="menu4" onclick="switchTab('menu4')">
+            <i class="fas fa-tasks"></i>
+            <span>Misi</span>
+        </button>
+        <button class="nav-item" data-nav="menu5" onclick="switchTab('menu5')">
+            <i class="fas fa-crown"></i>
+            <span>Premium</span>
+        </button>
+        <button class="nav-item" data-nav="riwayat" onclick="switchTab('riwayat')">
+            <i class="fas fa-history"></i>
+            <span>Riwayat</span>
+        </button>
+        <button class="nav-item" data-nav="informasi" onclick="switchTab('informasi')">
+            <i class="fas fa-info-circle"></i>
+            <span>Info</span>
+        </button>
+        <button class="nav-item" data-nav="akun" onclick="switchTab('akun')">
+            <i class="fas fa-user"></i>
+            <span>Akun</span>
+        </button>
+    </div>
+    
+    <!-- ========================================
+         MAIN CONTAINER
+    ======================================== -->
+    <div class="container">
+        
+        <!-- ========================================
+             RAMADHAN HEADER
+        ======================================== -->
+        <div id="ramadhanHeader" class="ramadhan-header">
+            <i class="fas fa-moon" style="font-size: 24px;"></i>
+            <div id="ramadhanStatus" class="ramadhan-message">
+                <span class="loading-small"></span> Memeriksa status...
+            </div>
+            <div id="ramadhanCountdown" class="ramadhan-countdown"></div>
+        </div>
+        
+        <!-- ========================================
+             HOME TAB
+        ======================================== -->
+        <div id="homeTab" class="main-tab active">
+            
+            <!-- Profile Card -->
+            <div class="profile-card" onclick="openDashboard()">
+                <div class="profile-info">
+                    <div class="profile-avatar" id="avatarDisplay">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-text">
+                        <h3 id="userNameDisplay">Guest</h3>
+                        <p id="userJoinDateDisplay"><i class="fas fa-calendar-alt"></i> Belum login</p>
+                    </div>
+                </div>
+                <div class="profile-stats-mini">
+                    <div class="stat-item">
+                        <div class="number" id="miniDownloads">0</div>
+                        <div class="label">Downloads</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="miniMP3">0</div>
+                        <div class="label">MP3</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="miniPremium">✗</div>
+                        <div class="label">Premium</div>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color: var(--accent);"></i>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="statToday">0</div>
+                    <div class="stat-label">Hari Ini</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotalMP3">0</div>
+                    <div class="stat-label">Total MP3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statMisi">0</div>
+                    <div class="stat-label">Misi Selesai</div>
+                </div>
+            </div>
+            
+            <!-- Ad Container -->
+            <div id="adContainer" class="ad-container">
+                <i class="fas fa-ad"></i> Iklan - Upgrade ke Premium untuk bebas iklan!
+                <div style="font-size: 12px; margin-top: 10px;">✨ Premium hanya Rp10.000/bulan ✨</div>
+            </div>
+            
+            <!-- TikTok Downloader Card -->
+            <div class="card">
+                <h2><i class="fab fa-tiktok"></i> TikTok Downloader</h2>
+                <div class="input-group">
+                    <input type="text" id="tiktokUrl" class="url-input" placeholder="Tempel link TikTok...">
+                    <button class="btn btn-secondary" onclick="pasteLink('tiktokUrl')">
+                        <i class="fas fa-paste"></i> Paste
+                    </button>
+                    <button class="btn btn-outline" onclick="clearTikTok()">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                    <button class="btn" id="downloadBtn" onclick="downloadTikTok()">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+                <div id="videoLoading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Memproses...
+                </div>
+                <div id="videoResult" class="result-box">
+                    <div class="result-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <span class="result-title"><i class="fas fa-check-circle"></i> Video Siap Diunduh!</span>
+                        <span class="result-badge" style="background: var(--accent); padding: 5px 12px; border-radius: 20px;">HD Quality</span>
+                    </div>
+                    <div class="video-preview">
+                        <div class="thumbnail">
+                            <img id="videoThumb" src="">
+                        </div>
+                        <div>
+                            <h3 id="videoTitle">Judul Video</h3>
+                            <div class="info-detail">
+                                <div class="info-row">
+                                    <span><i class="fas fa-user"></i> Pembuat</span>
+                                    <span id="videoAuthor">@user</span>
+                                </div>
+                                <div class="info-row">
+                                    <span><i class="fas fa-clock"></i> Durasi</span>
+                                    <span id="videoDuration">0:00</span>
+                                </div>
+                                <div class="info-row">
+                                    <span><i class="fas fa-calendar"></i> Tanggal Upload</span>
+                                    <span id="videoDate">-</span>
+                                </div>
+                                <div class="info-row">
+                                    <span><i class="fas fa-tag"></i> Kualitas</span>
+                                    <span id="videoQuality">HD (720p)</span>
+                                </div>
+                                <div class="info-row">
+                                    <span><i class="fas fa-database"></i> Ukuran</span>
+                                    <span id="videoSize">-</span>
+                                </div>
+                            </div>
+                            <div class="quality-buttons">
+                                <button class="quality-btn active" onclick="selectQuality('hd')">HD (720p)</button>
+                                <button class="quality-btn" onclick="selectQuality('sd')">SD (480p)</button>
+                            </div>
+                            <div class="action-buttons">
+                                <a href="#" id="downloadLink" class="btn" download>
+                                    <i class="fas fa-download"></i> DOWNLOAD VIDEO
+                                </a>
+                                <button class="btn btn-outline" onclick="clearTikTok()">
+                                    <i class="fas fa-redo"></i> Download Lainnya
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Card -->
+            <div class="card">
+                <h2><i class="fas fa-star"></i> Fitur Unggulan</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Aman & Bebas Virus</h4>
+                        <p>100% aman</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-infinity"></i>
+                        <h4>Tanpa Batas</h4>
+                        <p>Download unlimited</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-watermark"></i>
+                        <h4>Tanpa Watermark</h4>
+                        <p>Video bersih original</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-trophy"></i>
+                        <h4>Misi Ramadhan</h4>
+                        <p>Dapatkan Rp50.000!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             GENERATOR TAB
+        ======================================== -->
+        <div id="generatorTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-images"></i> Generator Foto</h2>
+                <p style="margin-bottom: 15px; color: #aaaaaa;">
+                    Masukkan link TikTok untuk mengambil thumbnail atau slide foto original (max 9 gambar)
+                </p>
+                <div class="input-group">
+                    <input type="text" id="watermarkUrl" class="url-input" placeholder="Link TikTok...">
+                    <button class="btn btn-secondary" onclick="pasteLink('watermarkUrl')">
+                        <i class="fas fa-paste"></i> Paste
+                    </button>
+                    <button class="btn" id="thumbBtn" onclick="generateThumbnail()">
+                        <i class="fas fa-magic"></i> Ambil Thumbnail
+                    </button>
+                    <button class="btn btn-secondary" id="multiBtn" onclick="generateMultipleFrames()">
+                        <i class="fas fa-images"></i> Ambil Slide Foto (Max 9)
+                    </button>
+                </div>
+                <div id="watermarkLoading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Mengambil gambar...
+                </div>
+                <div id="multiFrameLoading" style="display: none;">
+                    <div>
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span id="multiFrameStatusText">Mengambil slide gambar...</span>
+                    </div>
+                    <div class="progress-container">
+                        <div id="multiFrameProgress" class="progress-bar"></div>
+                    </div>
+                </div>
+                <div id="watermarkResult" class="result-box">
+                    <img id="watermarkImage" class="watermark-image" style="display: none;">
+                    <div id="watermarkButtons" style="display: none; justify-content: center; gap: 12px; margin-top: 15px;">
+                        <button class="btn" onclick="downloadSingleImage()">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyWatermarkLink()">
+                            <i class="fas fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+                <div id="multipleFramesResult" class="result-box">
+                    <div class="result-header" style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span class="result-title"><i class="fas fa-images"></i> Slide Gambar Original</span>
+                        <span class="result-badge" id="frameCount" style="background: var(--accent); padding: 5px 12px; border-radius: 20px;">0 Gambar</span>
+                    </div>
+                    <div id="framesGallery" class="gallery-container"></div>
+                    <div class="multiple-buttons">
+                        <button class="btn" onclick="downloadAllFrames()">
+                            <i class="fas fa-download"></i> Download Semua
+                        </button>
+                        <button class="btn btn-outline" onclick="closeMultipleFrames()">
+                            <i class="fas fa-times"></i> Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             AUDIO TAB (MP3 CONVERTER)
+        ======================================== -->
+        <div id="audioTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-music"></i> Convert ke MP3</h2>
+                <div class="input-group">
+                    <input type="file" id="videoFileInput" class="file-input" accept="video/*" onchange="handleVideoSelect()">
+                    <button class="btn" id="mp3Btn" onclick="convertToMP3()">
+                        <i class="fas fa-file-audio"></i> Convert ke MP3
+                    </button>
+                </div>
+                <div id="mp3Loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Mengkonversi...
+                </div>
+                <div id="mp3Result" class="result-box">
+                    <div class="result-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <span class="result-title"><i class="fas fa-check-circle"></i> MP3 Siap!</span>
+                        <span class="result-badge" style="background: var(--accent); padding: 5px 12px; border-radius: 20px;">MP3 Audio</span>
+                    </div>
+                    <div class="mp3-info-grid">
+                        <div class="mp3-info-card">
+                            <div class="label"><i class="fas fa-file"></i> Nama File</div>
+                            <div class="value" id="mp3FileName">-</div>
+                        </div>
+                        <div class="mp3-info-card">
+                            <div class="label"><i class="fas fa-database"></i> Ukuran</div>
+                            <div class="value" id="mp3FileSize">-</div>
+                        </div>
+                        <div class="mp3-info-card">
+                            <div class="label"><i class="fas fa-clock"></i> Durasi</div>
+                            <div class="value" id="mp3Duration">-</div>
+                        </div>
+                        <div class="mp3-info-card">
+                            <div class="label"><i class="fas fa-music"></i> Format</div>
+                            <div class="value">MP3 Audio</div>
+                        </div>
+                    </div>
+                    <div class="audio-player">
+                        <audio id="audioPreview" controls></audio>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="#" id="mp3DownloadLink" class="btn" download>
+                            <i class="fas fa-download"></i> DOWNLOAD MP3
+                        </a>
+                        <button class="btn btn-outline" onclick="resetMP3()">
+                            <i class="fas fa-redo"></i> Convert Lainnya
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             IG TAB - COMING SOON
+        ======================================== -->
+        <div id="igTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fab fa-instagram"></i> Instagram Downloader</h2>
+                
+                <!-- COMING SOON -->
+                <div class="coming-soon-container">
+                    <div class="coming-soon-icon">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <div class="coming-soon-content">
+                        <h3>🚀 Coming Soon!</h3>
+                        <p>Fitur Instagram Downloader sedang dalam pengembangan.</p>
+                        <p>Kami akan segera hadir dengan fitur:</p>
+                        <ul class="coming-soon-features">
+                            <li><i class="fas fa-check-circle"></i> Download Video Instagram</li>
+                            <li><i class="fas fa-check-circle"></i> Download Foto Instagram</li>
+                            <li><i class="fas fa-check-circle"></i> Download Reels Instagram</li>
+                            <li><i class="fas fa-check-circle"></i> Download Story Instagram</li>
+                            <li><i class="fas fa-check-circle"></i> Tanpa Watermark</li>
+                        </ul>
+                        <div class="coming-soon-notify">
+                            <p><i class="fas fa-bell"></i> Pantau terus update terbaru!</p>
+                        </div>
+                        <div class="coming-soon-progress">
+                            <div class="progress-label">Progres Pengembangan</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 45%;"></div>
+                            </div>
+                            <div class="progress-text">45%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             AI HELPER TAB
+        ======================================== -->
+        <div id="aiTab" class="main-tab">
+            <div class="card">
+                <h2>
+                    <i class="fas fa-robot"></i> AI Helper
+                    <span style="font-size: 11px; margin-left: 10px; background: var(--accent); color: #1a1a2e; padding: 2px 12px; border-radius: 20px;">Powered by Cerebras AI</span>
+                </h2>
+                
+                <!-- Rate Limit Info -->
+                <div id="aiRateLimit" class="ai-rate-limit">
+                    <i class="fas fa-clock"></i> Tunggu <span id="rateLimitCountdown">5</span> detik sebelum mengirim pesan lagi...
+                </div>
+                
+                <!-- AI Features -->
+                <div class="ai-features-grid">
+                    <div class="ai-feature-item">
+                        <i class="fas fa-comment"></i>
+                        <span>Ngobrol Santai</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <i class="fas fa-calculator"></i>
+                        <span>Matematika</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <i class="fas fa-code"></i>
+                        <span>Coding</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Belajar</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Ide & Tips</span>
+                    </div>
+                    <div class="ai-feature-item">
+                        <i class="fas fa-smile"></i>
+                        <span>Hiburan</span>
+                    </div>
+                </div>
+                
+                <!-- Chat Container -->
+                <div id="aiChatContainer" class="ai-chat-container">
+                    <div class="ai-message bot">
+                        <div class="msg-header">
+                            <span class="ai-icon">🤖</span> WaterTik AI Assistant
+                        </div>
+                        <div class="msg-content">
+                            <strong>Assalamu'alaikum! 👋</strong><br><br>
+                            Saya <strong>WaterTik AI</strong>, asisten pintar yang siap membantu kamu!<br><br>
+                            ✨ <strong>Kemampuan saya:</strong><br>
+                            • 🗣️ Ngobrol santai & curhat<br>
+                            • 📚 Bantu belajar (Matematika, IPA, Bahasa, dll)<br>
+                            • 💻 Bantu coding (HTML, CSS, JS, Python, PHP)<br>
+                            • 💰 Tips keuangan & investasi<br>
+                            • 🎨 Ide kreatif & hiburan<br>
+                            • 📱 Bantu penggunaan WaterTik<br><br>
+                            <strong>Tanyakan apa saja ya! 😊</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Buttons -->
+                <div class="ai-quick-buttons">
+                    <button class="ai-quick-btn" onclick="quickAsk('Halo, apa kabar?')">👋 Halo</button>
+                    <button class="ai-quick-btn" onclick="quickAsk('Bantu saya belajar matematika')">📚 Matematika</button>
+                    <button class="ai-quick-btn" onclick="quickAsk('Cara membuat website dengan HTML?')">💻 Coding</button>
+                    <button class="ai-quick-btn" onclick="quickAsk('Tips menabung yang baik')">💰 Keuangan</button>
+                    <button class="ai-quick-btn" onclick="quickAsk('Cerita lucu dong')">😄 Hiburan</button>
+                    <button class="ai-quick-btn" onclick="quickAsk('Cara download video TikTok di WaterTik?')">📱 WaterTik</button>
+                    <button class="ai-clear-btn" onclick="clearChat()"><i class="fas fa-eraser"></i> Hapus Chat</button>
+                </div>
+                
+                <!-- Input Group -->
+                <div class="input-group" style="margin-top: 15px;">
+                    <input type="text" id="aiQuestion" class="url-input" placeholder="Ketik pertanyaan...">
+                    <button class="btn btn-secondary" id="sendAIbtn" onclick="askAI()">
+                        <i class="fas fa-paper-plane"></i> Kirim
+                    </button>
+                </div>
+                
+                <!-- Typing Indicator -->
+                <div id="aiTypingIndicator" class="ai-typing">
+                    <span>WaterTik AI sedang mengetik</span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             MISI RAMADHAN TAB
+        ======================================== -->
+        <div id="menu4Tab" class="main-tab">
+            <div class="card">
+                <h2>
+                    <i class="fas fa-tasks"></i> Misi Ramadhan
+                    <span style="font-size: 12px; margin-left: 10px; background: var(--accent); padding: 4px 12px; border-radius: 20px;">Free</span>
+                </h2>
+                
+                <!-- Login Warning -->
+                <div id="missionLoginWarning" class="mission-login-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i> Kamu harus login terlebih dahulu untuk mengikuti Misi Ramadhan!
+                    <button class="btn btn-secondary" style="display: block; margin-top: 10px;" onclick="switchTab('akun')">Login Sekarang</button>
+                </div>
+                
+                <!-- Winners List -->
+                <div id="winnersListArea" class="winners-list">
+                    <h3 style="margin-bottom: 10px;"><i class="fas fa-trophy"></i> Daftar Pemenang</h3>
+                    <div id="winnersListContainer">
+                        <div style="text-align: center; padding: 10px; color: #aaaaaa;">Belum ada pemenang</div>
+                    </div>
+                </div>
+                
+                <!-- Mission Countdown Area -->
+                <div id="missionCountdownArea" class="mission-countdown" style="display: none;">
+                    <i class="fas fa-hourglass-half"></i>
+                    <h3>🌙 Menunggu Bulan Ramadhan 🌙</h3>
+                    <p>Misi Ramadhan akan segera hadir!</p>
+                    <div id="countdownTimer" style="font-size: 24px; font-weight: bold; color: var(--accent); margin: 15px 0;"></div>
+                    <div class="prize-info">
+                        <div class="prize-1">🏆 JUARA 1: Rp50.000 🏆</div>
+                        <div class="prize-2">🥈 JUARA 2: Rp20.000 🥈</div>
+                        <div class="prize-3">🥉 JUARA 3: Rp10.000 🥉</div>
+                        <div style="font-size: 11px; margin-top: 5px;">⚡ First Come First Served ⚡</div>
+                    </div>
+                </div>
+                
+                <!-- Mission Active Area -->
+                <div id="missionActiveArea" style="display: none;">
+                    <div class="prize-info">
+                        <div class="prize-1">🏆 JUARA 1: Rp50.000 🏆</div>
+                        <div class="prize-2">🥈 JUARA 2: Rp20.000 🥈</div>
+                        <div class="prize-3">🥉 JUARA 3: Rp10.000 🥉</div>
+                        <div style="font-size: 11px; margin-top: 5px;">⚡ First Come First Served (3 pemenang) ⚡</div>
+                    </div>
+                    <p style="margin-bottom: 15px;">🌙 Selamat menjalankan ibadah puasa! Selesaikan misi untuk mendapatkan hadiah!</p>
+                    
+                    <div class="mission-progress">
+                        <h3>Progres Misi Kamu:</h3>
+                        <div class="mission-status">
+                            <span><i class="fas fa-video"></i> Download Video (100x)</span>
+                            <span id="videoCount">0</span><span>/100</span>
+                        </div>
+                        <div class="mission-status">
+                            <span><i class="fas fa-images"></i> Generator Foto (100x)</span>
+                            <span id="photoCount">0</span><span>/100</span>
+                        </div>
+                        <div class="mission-status">
+                            <span><i class="fas fa-music"></i> Convert MP3 (10x)</span>
+                            <span id="mp3Count">0</span><span>/10</span>
+                        </div>
+                        <div class="progress-container">
+                            <div id="missionProgressBar" class="progress-bar"></div>
+                        </div>
+                        <div id="missionStatusText" style="text-align: center; margin-top: 10px;">Belum mulai misi</div>
+                    </div>
+                    <button id="claimMissionBtn" class="btn btn-premium" style="width: 100%; margin-top: 15px; display: none;" onclick="claimMission()">
+                        <i class="fas fa-gift"></i> Klaim Hadiah Sekarang!
+                    </button>
+                </div>
+                
+                <!-- Mission Lebaran Area -->
+                <div id="missionLebaranArea" class="mission-lebaran" style="display: none;">
+                    <i class="fas fa-star-and-crescent"></i>
+                    <h3>🌙 Taqabbalallahu minna wa minkum 🌙</h3>
+                    <p>Mohon maaf lahir dan batin</p>
+                    <p style="margin-top: 15px;">Misi Ramadhan telah berakhir. Sampai jumpa tahun depan!</p>
+                </div>
+                
+                <!-- Mission Full Area -->
+                <div id="missionFullArea" class="mission-full" style="display: none;">
+                    <i class="fas fa-trophy"></i>
+                    <h3>🏆 Misi Ramadhan Telah Berakhir 🏆</h3>
+                    <p>3 pemenang telah ditemukan!</p>
+                    <p style="margin-top: 10px;">Terima kasih atas partisipasinya.</p>
+                    <p>Sampai jumpa di Ramadhan tahun depan! 🌙</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             PREMIUM TAB
+        ======================================== -->
+        <div id="menu5Tab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-crown"></i> WaterTik Premium</h2>
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-gem" style="font-size: 60px; color: #FFD700;"></i>
+                    <h3 style="margin: 15px 0;">Upgrade ke Premium!</h3>
+                    <p>Nikmati bebas iklan dan fitur eksklusif lainnya.</p>
+                    <div style="background: rgba(255, 215, 0, 0.1); border-radius: 20px; padding: 20px; margin: 15px 0;">
+                        <p><i class="fas fa-check-circle" style="color: #FFD700;"></i> Bebas Iklan</p>
+                        <p><i class="fas fa-check-circle" style="color: #FFD700;"></i> Prioritas Misi</p>
+                        <p><i class="fas fa-check-circle" style="color: #FFD700;"></i> Support Pengembang</p>
+                    </div>
+                    <p style="font-size: 24px; font-weight: bold; color: #FFD700;">Hanya Rp10.000/bulan</p>
+                    <button class="btn btn-premium" onclick="openPremiumModal()">
+                        <i class="fas fa-shopping-cart"></i> Beli Premium Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             RIWAYAT TAB
+        ======================================== -->
+        <div id="riwayatTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Riwayat</h2>
+                <div id="historyList" class="history-list">
+                    <div style="text-align: center; padding: 40px;">
+                        <i class="fas fa-inbox"></i> Belum ada riwayat
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             INFORMASI TAB
+        ======================================== -->
+        <div id="informasiTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-info-circle"></i> Informasi</h2>
+                
+                <!-- Sub Navigation -->
+                <div class="info-subnav">
+                    <button id="btnAbout" class="active" onclick="showInfoPage('about')">
+                        <i class="fas fa-users"></i> Tentang Kami
+                    </button>
+                    <button id="btnPrivacy" onclick="showInfoPage('privacy')">
+                        <i class="fas fa-shield-alt"></i> Kebijakan Privasi
+                    </button>
+                </div>
+                
+                <!-- Tentang Kami Page -->
+                <div id="aboutPage" class="info-page active-page">
+                    <div class="about-content">
+                        <div class="creator-badge">
+                            <i class="fas fa-code" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                            <h3>WaterTik v5.0</h3>
+                            <p>Dibuat dengan penuh semangat oleh <strong>Fikri</strong> | Ramadhan 2026</p>
+                        </div>
+                        
+                        <h3><i class="fas fa-bullhorn"></i> Tentang WaterTik</h3>
+                        <p>WaterTik adalah platform unduh konten TikTok tanpa watermark tercepat dan termudah. Kami hadir untuk memudahkan Anda menyimpan video, foto slide, serta mengonversi video ke MP3 dengan kualitas terbaik.</p>
+                        <p>Dengan teknologi canggih dan komitmen pada keamanan, WaterTik menjadi pilihan utama bagi lebih dari 10.000+ pengguna aktif setiap harinya.</p>
+                        
+                        <h3><i class="fas fa-check-circle"></i> Keunggulan Kami</h3>
+                        <p>✅ Download video TikTok HD/SD tanpa watermark<br>
+                        ✅ Generator foto dan slide gambar (max 9 slide)<br>
+                        ✅ Konversi video ke MP3 kualitas tinggi<br>
+                        ✅ Misi Ramadhan dengan hadiah uang tunai Rp50.000<br>
+                        ✅ Premium bebas iklan hanya Rp10.000/bulan<br>
+                        ✅ AI Helper untuk bantu belajar, coding, keuangan<br>
+                        ✅ Proteksi privasi dan data pengguna</p>
+                        
+                        <h3><i class="fas fa-envelope"></i> Kontak & Dukungan</h3>
+                        <p>Email: dllweb9@gmail.com<br>
+                        WhatsApp: 089699024654<br>
+                        Jam operasional: 08.00 - 22.00 WIB</p>
+                    </div>
+                </div>
+                
+                <!-- Kebijakan Privasi Page -->
+                <div id="privacyPage" class="info-page">
+                    <div class="privacy-content">
+                        <h3><i class="fas fa-lock"></i> Kebijakan Privasi WaterTik</h3>
+                        <p>Terakhir diperbarui: Maret 2026</p>
+                        
+                        <h3>1. Informasi yang Kami Kumpulkan</h3>
+                        <p>Untuk memberikan layanan terbaik, WaterTik mengumpulkan beberapa data berikut:</p>
+                        <ul>
+                            <li><strong>Data Fingerprint & ID User:</strong> Digunakan untuk mengidentifikasi akun dan menyimpan riwayat aktivitas secara unik.</li>
+                            <li><strong>Data Aktivitas:</strong> Jumlah download, konversi MP3, dan partisipasi misi Ramadhan disimpan di server.</li>
+                            <li><strong>Avatar & Nama Pengguna:</strong> Data yang Anda berikan secara sukarela saat registrasi/login.</li>
+                            <li><strong>Data Teknis:</strong> Browser, OS, dan alamat IP (anonymized) untuk analisis performa dan keamanan.</li>
+                        </ul>
+                        
+                        <h3>2. Penggunaan Data</h3>
+                        <p>Data yang kami kumpulkan digunakan untuk:</p>
+                        <ul>
+                            <li>Menyediakan layanan unduh video TikTok tanpa watermark.</li>
+                            <li>Menjalankan misi Ramadhan dan sistem pemenang hadiah.</li>
+                            <li>Memproses upgrade premium dan aktivasi fitur bebas iklan.</li>
+                            <li>Meningkatkan keamanan serta mencegah penyalahgunaan layanan (blocking akun).</li>
+                        </ul>
+                        
+                        <h3>3. Privasi & Keamanan</h3>
+                        <p>Kami tidak akan pernah membagikan data pribadi Anda kepada pihak ketiga tanpa izin, kecuali diwajibkan oleh hukum. Seluruh data disimpan dengan enkripsi yang aman.</p>
+                        
+                        <h3>4. Iklan & Layanan Pihak Ketiga</h3>
+                        <p>WaterTik menggunakan Google AdSense untuk menampilkan iklan non-personalisasi. Google dapat menggunakan cookie untuk menayangkan iklan berdasarkan kunjungan Anda. Anda dapat mengatur preferensi iklan melalui pengaturan browser.</p>
+                        
+                        <h3>5. Hak Pengguna</h3>
+                        <p>Anda berhak menghapus akun dan data Anda dengan menghubungi admin melalui WhatsApp/email. Data misi dan winner akan tetap tersimpan untuk kepentingan pemenang hadiah.</p>
+                        
+                        <h3>6. Perubahan Kebijakan</h3>
+                        <p>WaterTik dapat memperbarui kebijakan privasi ini sewaktu-waktu. Perubahan akan diinformasikan melalui notifikasi di aplikasi.</p>
+                        
+                        <h3>7. Kontak Privasi</h3>
+                        <p>Jika Anda memiliki pertanyaan tentang privasi, silakan hubungi: dllweb9@gmail.com atau WhatsApp 089699024654.</p>
+                        <p style="margin-top: 15px;">Dengan menggunakan WaterTik, Anda menyetujui kebijakan privasi ini.</p>
+                    </div>
+                </div>
+                
+                <!-- Info List -->
+                <div class="info-list">
+                    <div class="info-item"><i class="fas fa-code"></i> <span>WaterTik v5.0</span></div>
+                    <div class="info-item"><i class="fas fa-user"></i> <span>Creator: Fikri</span></div>
+                    <div class="info-item"><i class="fas fa-calendar"></i> <span>Ramadhan 2026</span></div>
+                    <div class="info-item"><i class="fas fa-shield-alt"></i> <span>Keamanan: 100%</span></div>
+                    <div class="info-item"><i class="fas fa-robot"></i> <span>AI: Cerebras AI</span></div>
+                    <div class="info-item"><i class="fas fa-moon"></i> <span>Status: <span id="ramadhanInfoStatus">-</span></span></div>
+                    <div class="info-item"><i class="fab fa-whatsapp"></i> <span>Admin: 089699024654</span></div>
+                </div>
+                
+                <!-- User ID Display -->
+                <div id="infoUserIdContainer" style="margin-top: 20px; display: none;">
+                    <div class="user-id-display">
+                        <div class="user-id-label">
+                            <i class="fas fa-id-card"></i><strong>ID User</strong>
+                        </div>
+                        <div class="user-id-value" id="infoUserIdValue">-</div>
+                        <button class="copy-id-btn" onclick="copyUserId()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================
+             AKUN TAB
+        ======================================== -->
+        <div id="akunTab" class="main-tab">
+            <div class="card">
+                <h2><i class="fas fa-user-circle"></i> Akun Saya</h2>
+                
+                <!-- Login Section -->
+                <div id="loginSection">
+                    <input type="text" id="loginName" class="login-input" placeholder="Masukkan nama...">
+                    <button class="login-btn" onclick="attemptLogin()" style="width: 100%; padding: 14px; background: var(--accent-grad); border: none; border-radius: 15px; color: #1a1a2e; font-weight: bold; cursor: pointer; margin-bottom: 10px;">
+                        Login / Daftar
+                    </button>
+                    <button class="btn btn-outline" onclick="openKontakPopup()" style="width: 100%;">
+                        <i class="fab fa-whatsapp"></i> Hubungi Admin
+                    </button>
+                </div>
+                
+                <!-- User Info Section (Setelah Login) -->
+                <div id="userInfoSection" style="display: none;">
+                    <div class="user-info">
+                        <div class="avatar-preview" id="avatarPreviewDash">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 id="loggedUserName">User</h3>
+                        <p>Status: <span id="userPremiumStatus">Free User</span></p>
+                        <p>Premium EXP: <span id="userPremiumExpiry">-</span></p>
+                        <p>Bergabung: <span id="loggedJoinDate">-</span></p>
+                    </div>
+                    
+                    <div class="user-id-display">
+                        <div class="user-id-label">
+                            <i class="fas fa-id-card"></i><strong>ID User</strong>
+                        </div>
+                        <div class="user-id-value" id="akunUserIdValue">-</div>
+                        <button class="copy-id-btn" onclick="copyUserId()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="akunDownloads">0</div>
+                            <div class="stat-label">Downloads</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="akunMP3">0</div>
+                            <div class="stat-label">MP3</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="akunMisi">0</div>
+                            <div class="stat-label">Misi</div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="openDashboard()" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-user-edit"></i> Edit Avatar
+                    </button>
+                    <button class="btn btn-outline" onclick="openKontakPopup()" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fab fa-whatsapp"></i> Hubungi Admin
+                    </button>
+                    <button class="btn btn-premium" onclick="openPremiumModal()" style="width: 100%;">
+                        <i class="fas fa-crown"></i> Upgrade Premium
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 WaterTik | Created by <strong>Fikri</strong> | <span id="currentDate"></span></p>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         POPUP MODALS
+    ======================================== -->
+    
+    <!-- Ban Reason Popup -->
+    <div id="banReasonPopup" class="ban-popup-overlay">
+        <div class="ban-popup-content">
+            <i class="fas fa-ban" style="font-size: 48px; color: #ff0050; margin-bottom: 15px;"></i>
+            <h2 style="color: #ff0050;">⚠️ AKUN DIBLOKIR ⚠️</h2>
+            <div id="banReasonText" style="margin: 15px 0; padding: 10px; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">Alasan tidak tersedia</div>
+            <p>Akun Anda tidak dapat menggunakan fitur WaterTik.</p>
+            <p>Silahkan hubungi admin untuk informasi lebih lanjut.</p>
+            <div class="wa-contact" style="margin-top: 15px; justify-content: center;">
+                <span>Admin WaterTik</span>
+                <span>089699024654</span>
+                <a href="https://wa.me/6289699024654" class="wa-button-popup" target="_blank">Chat</a>
+            </div>
+            <button class="close-popup" onclick="closeBanPopup()" style="margin-top: 15px;">Mengerti</button>
+        </div>
+    </div>
+    
+    <!-- Winner Popup -->
+    <div id="winnerPopup" class="winner-popup-overlay">
+        <div class="winner-popup-content">
+            <div id="winnerPopupIcon"><i class="fas fa-trophy"></i></div>
+            <h2 id="winnerPopupTitle">🎉 SELAMAT! 🎉</h2>
+            <div id="winnerPopupPrize" class="winner-prize">Rp50.000</div>
+            <div id="winnerPopupMessage" class="winner-message">Anda menjadi JUARA 1!<br>Segera hubungi admin untuk klaim hadiah.</div>
+            <a href="https://wa.me/6289699024654" class="wa-button" target="_blank" id="winnerPopupWaButton" style="background: #25D366; padding: 10px; border-radius: 30px; color: white; text-decoration: none; margin: 10px 0; display: inline-block;">
+                <i class="fab fa-whatsapp"></i> Hubungi Admin Sekarang
+            </a>
+            <button class="close-popup" onclick="closeWinnerPopup()">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- Kontak Popup -->
+    <div id="kontakPopup" class="kontak-popup">
+        <div class="popup-content">
+            <h2><i class="fab fa-whatsapp"></i> Kontak Admin</h2>
+            <div class="wa-contact">
+                <span>Admin WaterTik</span>
+                <span>089699024654</span>
+                <a href="https://wa.me/6289699024654" class="wa-button-popup" target="_blank">Chat</a>
+            </div>
+            <button class="close-popup" onclick="closeKontakPopup()">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- Dashboard Modal (Edit Avatar) -->
+    <div id="dashboardModal" class="dashboard-modal">
+        <div class="popup-content">
+            <h2><i class="fas fa-user-edit"></i> Edit Avatar</h2>
+            <div class="avatar-preview" id="avatarPreviewModal"><i class="fas fa-user"></i></div>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button class="btn" onclick="uploadAvatar()"><i class="fas fa-upload"></i> Upload Avatar</button>
+                <button class="btn btn-secondary" onclick="removeAvatar()"><i class="fas fa-trash"></i> Hapus</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeDashboard()" style="margin-top: 15px;"><i class="fas fa-times"></i> Tutup</button>
+        </div>
+    </div>
+    
+    <!-- Premium Modal -->
+    <div id="premiumModal" class="premium-modal">
+        <div class="popup-content">
+            <h2><i class="fas fa-crown"></i> Upgrade Premium</h2>
+            <p style="margin: 15px 0;">Hanya <strong style="color: #FFD700; font-size: 20px;">Rp10.000/bulan</strong></p>
+            <div class="payment-item">
+                <span><i class="fas fa-money-bill-wave"></i> DANA</span>
+                <span>089699024654</span>
+                <button class="copy-btn" onclick="copyToClipboard('089699024654')">Copy</button>
+            </div>
+            <div class="payment-item">
+                <span><i class="fas fa-mobile-alt"></i> GoPay</span>
+                <span>083875424751</span>
+                <button class="copy-btn" onclick="copyToClipboard('083875424751')">Copy</button>
+            </div>
+            <div class="payment-item">
+                <span><i class="fas fa-qrcode"></i> QRIS</span>
+                <span>Hubungi admin</span>
+                <a href="https://wa.me/6289699024654" class="wa-button-popup" style="padding: 5px 12px;">Chat</a>
+            </div>
+            <p style="margin: 15px 0; font-size: 12px;">Setelah bayar, kirim bukti ke admin WhatsApp untuk aktivasi premium.</p>
+            <a href="https://wa.me/6289699024654" class="btn btn-premium" style="display: inline-block; margin: 10px 0; text-decoration: none;">Hubungi Admin</a>
+            <button class="close-popup" onclick="closePremiumModal()">Tutup</button>
+        </div>
+    </div>
+    
+    <!-- Ramadhan Start Popup -->
+    <div id="ramadhanStartPopup" class="ramadhan-start-popup">
+        <div class="ramadhan-popup-content">
+            <i class="fas fa-moon" style="font-size: 60px; color: #FFD700;"></i>
+            <h2 style="margin: 15px 0;">🌙 Selamat Bulan Ramadhan! 🌙</h2>
+            <div class="ai-message">
+                <i class="fas fa-robot"></i> <strong>Assalamu'alaikum Warahmatullahi Wabarakatuh,</strong><br><br>
+                "Marhaban ya Ramadhan, bulan penuh berkah dan ampunan. Semoga di bulan suci ini, ibadah puasa kita diterima, doa-doa kita dikabulkan, dan hati kita semakin bersih. Jadikan setiap langkah kita sebagai ladang pahala. Selamat menunaikan ibadah puasa, semoga diberikan kelancaran dan kesehatan selalu. 🌙✨"<br><br>
+                — <em>WaterTik AI</em>
+            </div>
+            <p style="margin-top: 10px;">✨ Ikuti Misi Ramadhan dan menangkan hadiah hingga Rp50.000! ✨</p>
+            <button class="btn btn-secondary" onclick="closeRamadhanPopup()" style="margin-top: 15px;"><i class="fas fa-check"></i> Semoga Puasa Lancar</button>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         JAVASCRIPT - DI DALAM HTML (TANPA API KEY)
+    ======================================== -->
+    <script>
+        // ================================================================
+        // 📦 JAVASCRIPT WATER TIK - FULL (API KEY DARI CONFIG)
+        // ================================================================
+        
+        console.log('🔍 Checking config...');
+        
+        // Ambil config yang sudah di-load
+        const CONFIG = window.__CONFIG || {};
+        
+        // ========================================
+        // INISIALISASI FIREBASE
+        // ========================================
+        let db = null;
+        let firebaseApp = null;
+        
+        try {
+            if (CONFIG && CONFIG.firebase && CONFIG.firebase.apiKey) {
+                firebaseApp = firebase.initializeApp(CONFIG.firebase);
+                db = firebase.firestore();
+                console.log('✅ Firebase berhasil diinisialisasi');
+            } else {
+                console.warn('⚠️ Firebase config tidak lengkap');
+            }
+        } catch (e) {
+            console.error('❌ Gagal inisialisasi Firebase:', e.message);
+        }
+        
+        // ========================================
+        // KONFIGURASI API
+        // ========================================
+        const CEREBRAS_API_KEY = CONFIG?.cerebras?.apiKey || '';
+        const CEREBRAS_API_URL = CONFIG?.cerebras?.apiUrl || '';
+        const CEREBRAS_MODEL = CONFIG?.cerebras?.model || '';
+        const TIKTOK_API_URL = CONFIG?.tiktok?.apiUrl || '';
+        
+        if (!CEREBRAS_API_KEY) {
+            console.warn('⚠️ CEREBRAS_API_KEY tidak ditemukan! AI tidak akan berfungsi.');
+        }
+        
+        if (!TIKTOK_API_URL) {
+            console.warn('⚠️ TIKTOK_API_URL tidak ditemukan! Download TikTok tidak akan berfungsi.');
+        }
+        
+        // ========================================
+        // SISTEM PROMPT AI
+        // ========================================
+        const AI_SYSTEM_PROMPT = `Kamu adalah WaterTik AI Assistant, asisten AI yang cerdas, ramah, dan membantu.
+        
+        Kemampuanmu:
+        - Mengobrol santai seperti manusia
+        - Menjawab pertanyaan umum
+        - Memberikan jokes dan hiburan
+        - Menjadi teman curhat yang suportif
+        - Membantu belajar sekolah (Matematika, IPA, Bahasa Indonesia, dll)
+        - Membantu coding HTML, CSS, JavaScript, Python, PHP, dll
+        - Membantu membuat website dan aplikasi
+        - Memberikan tips keuangan dan pengelolaan uang
+        - Menjelaskan investasi, saham, emas, dan ekonomi secara umum
+        - Membantu membuat rencana tabungan
+        - Menjelaskan teknologi dan AI
+        - Membantu penggunaan website WaterTik
+        
+        Aturan:
+        - Jawab dengan Bahasa Indonesia yang natural.
+        - Ramah, sopan, dan mudah dipahami.
+        - Jika tidak tahu sesuatu, katakan dengan jujur.
+        - Jangan mengarang data atau berita terbaru.
+        
+        Gaya bicara:
+        - Santai saat diajak santai.
+        - Serius saat membahas pelajaran atau keuangan.
+        - Bisa bercanda jika diminta.
+        - Gunakan emoji untuk membuat obrolan lebih hidup.`;
+        
+        // ========================================
+        // VARIABEL GLOBAL
+        // ========================================
+        let currentUser = null;
+        let missionData = { videoDownloads: 0, photoGenerates: 0, mp3Converts: 0 };
+        let ramadhanPhase = 'countdown';
+        let ramadhanDaysLeft = 0;
+        let ramadhanPopupShown = false;
+        let cachedFingerprint = null;
+        let misiFull = false;
+        let currentVideoData = null;
+        let currentQuality = 'hd';
+        let currentWatermarkUrl = '';
+        let currentWatermarkBlob = null;
+        let framesList = [];
+        let selectedVideoFile = null;
+        let lastRequestTime = 0;
+        const MIN_INTERVAL = 5000;
+        let isRequesting = false;
+        let csrfToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        
+        // ========================================
+        // FUNGSI BANTUAN
+        // ========================================
+        function sanitizeInput(text) {
+            if (!text) return '';
+            return text.replace(/[<>'"]/g, '').substring(0, 1000);
+        }
+        
+        function showToast(msg) {
+            document.querySelectorAll('.toast').forEach(el => el.remove());
+            let t = document.createElement('div');
+            t.className = 'toast';
+            t.innerHTML = sanitizeInput(msg);
+            document.body.appendChild(t);
+            setTimeout(() => { if (t.parentNode) t.remove(); }, 2500);
+        }
+        
+        function showNotification(title, msg) {
+            const titleEl = document.getElementById('notificationTitle');
+            const msgEl = document.getElementById('notificationMessage');
+            const popup = document.getElementById('notificationPopup');
+            if (titleEl) titleEl.innerHTML = sanitizeInput(title);
+            if (msgEl) msgEl.innerHTML = sanitizeInput(msg);
+            if (popup) {
+                popup.classList.add('active');
+                setTimeout(() => popup.classList.remove('active'), 5000);
+            }
+        }
+        
+        function closeNotificationPopup() {
+            const popup = document.getElementById('notificationPopup');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('✅ Tersalin!');
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const input = document.createElement('input');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ Tersalin!');
+            } catch (e) {
+                showToast('❌ Gagal copy');
+            }
+            document.body.removeChild(input);
+        }
+        
+        function formatDuration(s) {
+            let m = Math.floor(s / 60);
+            let sc = Math.floor(s % 60);
+            return `${m}:${sc.toString().padStart(2, '0')}`;
+        }
+        
+        function generateUniqueUserId() {
+            let c = '0123456789abcdefghijklmnopqrstuvwxyz';
+            let r = '';
+            for (let i = 0; i < 8; i++) r += c[Math.floor(Math.random() * c.length)];
+            return `WT-FIK-${r}-${Math.floor(Math.random() * 9000 + 1000)}`;
+        }
+        
+        // ========================================
+        // FINGERPRINT
+        // ========================================
+        async function getFingerprint() {
+            if (cachedFingerprint) return cachedFingerprint;
+            try {
+                const fp = await FingerprintJS.load();
+                const res = await fp.get();
+                cachedFingerprint = res.visitorId;
+                return cachedFingerprint;
+            } catch (e) {
+                cachedFingerprint = 'fp_' + Math.random().toString(36).substr(2, 16);
+                return cachedFingerprint;
+            }
+        }
+        
+        // ========================================
+        // CEK BLOKIR & MAINTENANCE
+        // ========================================
+        async function checkBlockedUser(fp) {
+            if (!db) return false;
+            try {
+                let doc = await db.collection('users').doc(fp).get();
+                if (doc.exists && doc.data().blocked === true) {
+                    document.getElementById('blockedOverlay').classList.add('active');
+                    document.body.style.pointerEvents = 'none';
+                    return true;
+                }
+            } catch (e) {
+                console.log('⚠️ Gagal cek blokir user:', e.message);
+            }
+            return false;
+        }
+        
+        async function checkMaintenance() {
+            if (!db) return false;
+            try {
+                let doc = await db.collection('settings').doc('maintenance').get();
+                if (doc.exists && doc.data().isActive === true) {
+                    document.getElementById('maintenanceOverlay').classList.add('active');
+                    document.body.style.pointerEvents = 'none';
+                    return true;
+                }
+            } catch (e) {
+                console.log('⚠️ Gagal cek maintenance:', e.message);
+            }
+            document.getElementById('maintenanceOverlay').classList.remove('active');
+            document.body.style.pointerEvents = 'auto';
+            return false;
+        }
+        
+        // ========================================
+        // FIREBASE OPERATIONS
+        // ========================================
+        async function saveUserToStorage(user) {
+            if (!db || !user || !user.fingerprint) return;
+            try {
+                await db.collection('users').doc(user.fingerprint).set({
+                    name: user.name,
+                    avatar: user.avatar || null,
+                    totalDownloads: user.totalDownloads || 0,
+                    totalMP3: user.totalMP3 || 0,
+                    todayDownloads: user.todayDownloads || 0,
+                    joinDate: user.joinDate || new Date().toISOString(),
+                    isPremium: user.isPremium || false,
+                    premiumExpiry: user.premiumExpiry || null,
+                    missionCompleted: user.missionCompleted || false,
+                    missionRank: user.missionRank || null,
+                    blocked: user.blocked || false,
+                    userId: user.userId || null
+                }, { merge: true });
+            } catch (e) {
+                console.log('⚠️ Gagal save user:', e.message);
+            }
+        }
+        
+        async function loadUserFromStorage(fp) {
+            if (!db) return null;
+            try {
+                let doc = await db.collection('users').doc(fp).get();
+                return doc.exists ? doc.data() : null;
+            } catch (e) {
+                console.log('⚠️ Gagal load user:', e.message);
+                return null;
+            }
+        }
+        
+        async function saveMissionToStorage(fp, m) {
+            if (!db) return;
+            try {
+                await db.collection('missions').doc(fp).set(m, { merge: true });
+            } catch (e) {
+                console.log('⚠️ Gagal save mission:', e.message);
+            }
+        }
+        
+        async function loadMissionFromStorage(fp) {
+            if (!db) return null;
+            try {
+                let doc = await db.collection('missions').doc(fp).get();
+                return doc.exists ? doc.data() : null;
+            } catch (e) {
+                console.log('⚠️ Gagal load mission:', e.message);
+                return null;
+            }
+        }
+        
+        async function loadWinnersFromStorage() {
+            if (!db) return [];
+            try {
+                let doc = await db.collection('global').doc('winners').get();
+                if (doc.exists && doc.data().winners) {
+                    misiFull = doc.data().winners.length >= 3;
+                    return doc.data().winners;
+                }
+            } catch (e) {
+                console.log('⚠️ Gagal load winners:', e.message);
+            }
+            misiFull = false;
+            return [];
+        }
+        
+        async function saveWinnersToStorage(w) {
+            if (!db) return;
+            try {
+                await db.collection('global').doc('winners').set({ winners: w });
+            } catch (e) {
+                console.log('⚠️ Gagal save winners:', e.message);
+            }
+        }
+        
+        async function checkAndResetRamadhanMission() {
+            if (!db) return;
+            try {
+                const resetDoc = await db.collection('settings').doc('ramadhanReset').get();
+                const lastResetYear = resetDoc.exists ? resetDoc.data().lastResetYear : 0;
+                const currentYear = new Date().getFullYear();
+                
+                if (ramadhanPhase === 'active' && currentYear > lastResetYear) {
+                    console.log("🌙 Melakukan reset misi Ramadhan tahunan...");
+                    try {
+                        const missionsSnap = await db.collection('missions').get();
+                        for (const doc of missionsSnap.docs) {
+                            await doc.ref.set({ videoDownloads: 0, photoGenerates: 0, mp3Converts: 0 });
+                        }
+                        const usersSnap = await db.collection('users').get();
+                        for (const doc of usersSnap.docs) {
+                            await doc.ref.update({ missionCompleted: false });
+                        }
+                        await db.collection('global').doc('winners').set({ winners: [] });
+                        await db.collection('settings').doc('ramadhanReset').set({ lastResetYear: currentYear, resetAt: new Date().toISOString() });
+                        console.log("✅ Reset misi Ramadhan selesai untuk tahun", currentYear);
+                    } catch (e) {
+                        console.log('⚠️ Gagal reset misi:', e.message);
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Error check reset Ramadhan:', error.message);
+            }
+        }
+        
+        // ========================================
+        // LOGIN
+        // ========================================
+        async function attemptLogin() {
+            const nameInput = document.getElementById('loginName');
+            if (!nameInput) {
+                showToast('❌ Input login tidak ditemukan');
+                return;
+            }
+            
+            let name = nameInput.value.trim();
+            if (!name) {
+                showToast('Masukkan nama!');
+                return;
+            }
+            
+            let fp = await getFingerprint();
+            if (await checkBlockedUser(fp)) return;
+            
+            let fbUser = await loadUserFromStorage(fp);
+            if (fbUser) {
+                currentUser = fbUser;
+                showToast(`Selamat datang kembali, ${currentUser.name}!`);
+            } else {
+                currentUser = {
+                    name: name,
+                    avatar: null,
+                    totalDownloads: 0,
+                    totalMP3: 0,
+                    todayDownloads: 0,
+                    joinDate: new Date().toISOString(),
+                    isPremium: false,
+                    premiumExpiry: null,
+                    fingerprint: fp,
+                    missionCompleted: false,
+                    missionRank: null,
+                    blocked: false,
+                    userId: generateUniqueUserId()
+                };
+                await saveUserToStorage(currentUser);
+                showNotification("🎉 Selamat Datang!", `Selamat datang ${name} di WaterTik!`);
+            }
+            
+            let fbMission = await loadMissionFromStorage(fp);
+            if (fbMission) missionData = fbMission;
+            else missionData = { videoDownloads: 0, photoGenerates: 0, mp3Converts: 0 };
+            await saveMissionToStorage(fp, missionData);
+            
+            updateUI();
+            showToast(`✅ Login berhasil sebagai ${currentUser.name}`);
+            nameInput.value = '';
+            
+            if (ramadhanPhase === 'active' && !ramadhanPopupShown && currentUser) {
+                document.getElementById('ramadhanStartPopup').classList.add('active');
+                ramadhanPopupShown = true;
+            }
+            
+            await updateWinnersList();
+            updateMissionDisplay();
+        }
+        
+        function isPremiumActive(u) {
+            return u && u.isPremium && u.premiumExpiry && new Date(u.premiumExpiry) > new Date();
+        }
+        
+        async function updateDownloadStats() {
+            if (currentUser) {
+                currentUser.totalDownloads++;
+                currentUser.todayDownloads = (currentUser.todayDownloads || 0) + 1;
+                await saveUserToStorage(currentUser);
+                updateUI();
+            }
+        }
+        
+        // ========================================
+        // UPDATE MISI
+        // ========================================
+        async function updateMissionStats(type) {
+            if (!currentUser || currentUser.missionCompleted) return false;
+            if (ramadhanPhase !== 'active') return false;
+            
+            let winners = await loadWinnersFromStorage();
+            if (winners.length >= 3) {
+                updateMissionDisplay();
+                return false;
+            }
+            if (type === 'video') missionData.videoDownloads++;
+            else if (type === 'photo') missionData.photoGenerates++;
+            else if (type === 'mp3') missionData.mp3Converts++;
+            await saveMissionToStorage(currentUser.fingerprint, missionData);
+            
+            if (missionData.videoDownloads >= 100 && missionData.photoGenerates >= 100 && missionData.mp3Converts >= 10) {
+                showNotification("✅ Misi Selesai!", "Klik Klaim Hadiah!");
+            }
+            updateMissionDisplay();
+            return true;
+        }
+        
+        // ========================================
+        // UI UPDATE
+        // ========================================
+        function updateUI() {
+            if (currentUser) {
+                let premiumActive = isPremiumActive(currentUser);
+                let joinDate = new Date(currentUser.joinDate).toLocaleDateString('id-ID');
+                
+                const nameDisplay = document.getElementById('userNameDisplay');
+                const joinDisplay = document.getElementById('userJoinDateDisplay');
+                const miniDl = document.getElementById('miniDownloads');
+                const miniMp3 = document.getElementById('miniMP3');
+                const miniPrem = document.getElementById('miniPremium');
+                const loginSection = document.getElementById('loginSection');
+                const userSection = document.getElementById('userInfoSection');
+                const loggedName = document.getElementById('loggedUserName');
+                const premStatus = document.getElementById('userPremiumStatus');
+                const loggedJoin = document.getElementById('loggedJoinDate');
+                const akunDl = document.getElementById('akunDownloads');
+                const akunMp3 = document.getElementById('akunMP3');
+                const akunMisi = document.getElementById('akunMisi');
+                const statToday = document.getElementById('statToday');
+                const statTotalMp3 = document.getElementById('statTotalMP3');
+                const statMisi = document.getElementById('statMisi');
+                const avatar = document.getElementById('avatarDisplay');
+                const adContainer = document.getElementById('adContainer');
+                
+                if (nameDisplay) nameDisplay.innerText = currentUser.name;
+                if (joinDisplay) joinDisplay.innerHTML = `Member since ${joinDate}`;
+                if (miniDl) miniDl.innerText = currentUser.totalDownloads;
+                if (miniMp3) miniMp3.innerText = currentUser.totalMP3;
+                if (miniPrem) miniPrem.innerHTML = premiumActive ? '<i class="fas fa-crown"></i>' : '✗';
+                if (loginSection) loginSection.style.display = 'none';
+                if (userSection) userSection.style.display = 'block';
+                if (loggedName) loggedName.innerText = currentUser.name;
+                if (premStatus) premStatus.innerHTML = premiumActive ? '✓ Premium Active' : 'Free User';
+                if (loggedJoin) loggedJoin.innerText = joinDate;
+                if (akunDl) akunDl.innerText = currentUser.totalDownloads;
+                if (akunMp3) akunMp3.innerText = currentUser.totalMP3;
+                if (akunMisi) akunMisi.innerText = currentUser.missionCompleted ? 1 : 0;
+                if (statToday) statToday.innerText = currentUser.todayDownloads || 0;
+                if (statTotalMp3) statTotalMp3.innerText = currentUser.totalMP3;
+                if (statMisi) statMisi.innerText = currentUser.missionCompleted ? 1 : 0;
+                
+                if (avatar) {
+                    if (currentUser.avatar) avatar.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
+                    else avatar.innerHTML = '<i class="fas fa-user"></i>';
+                }
+                
+                if (adContainer) adContainer.classList.toggle('hidden', premiumActive);
+                updateUserIdDisplay();
+            } else {
+                const loginSection = document.getElementById('loginSection');
+                const userSection = document.getElementById('userInfoSection');
+                const nameDisplay = document.getElementById('userNameDisplay');
+                if (loginSection) loginSection.style.display = 'block';
+                if (userSection) userSection.style.display = 'none';
+                if (nameDisplay) nameDisplay.innerText = 'Guest';
+            }
+            updateMissionDisplay();
+        }
+        
+        function updateUserIdDisplay() {
+            let c = document.getElementById('infoUserIdContainer');
+            let iv = document.getElementById('infoUserIdValue');
+            let av = document.getElementById('akunUserIdValue');
+            if (currentUser && currentUser.userId) {
+                if (c) c.style.display = 'block';
+                if (iv) iv.innerText = currentUser.userId;
+                if (av) av.innerText = currentUser.userId;
+            } else if (c) c.style.display = 'none';
+        }
+        
+        function copyUserId() {
+            if (currentUser && currentUser.userId) {
+                copyToClipboard(currentUser.userId);
+            } else showToast('❌ Belum login');
+        }
+        
+        // ========================================
+        // TAMPILAN MISI
+        // ========================================
+        function updateMissionDisplay() {
+            let loginWarn = document.getElementById('missionLoginWarning');
+            let countdownArea = document.getElementById('missionCountdownArea');
+            let activeArea = document.getElementById('missionActiveArea');
+            let lebaranArea = document.getElementById('missionLebaranArea');
+            let fullArea = document.getElementById('missionFullArea');
+            
+            if (!currentUser) {
+                if (loginWarn) loginWarn.style.display = 'block';
+                if (countdownArea) countdownArea.style.display = 'none';
+                if (activeArea) activeArea.style.display = 'none';
+                if (lebaranArea) lebaranArea.style.display = 'none';
+                if (fullArea) fullArea.style.display = 'none';
+                return;
+            } else {
+                if (loginWarn) loginWarn.style.display = 'none';
+            }
+            
+            if (ramadhanPhase === 'countdown') {
+                if (countdownArea) countdownArea.style.display = 'block';
+                if (activeArea) activeArea.style.display = 'none';
+                if (lebaranArea) lebaranArea.style.display = 'none';
+                if (fullArea) fullArea.style.display = 'none';
+                const timer = document.getElementById('countdownTimer');
+                if (timer) timer.innerHTML = `⏳ ${ramadhanDaysLeft} hari lagi menuju Ramadhan`;
+            } else if (ramadhanPhase === 'active') {
+                if (misiFull) {
+                    if (countdownArea) countdownArea.style.display = 'none';
+                    if (activeArea) activeArea.style.display = 'none';
+                    if (lebaranArea) lebaranArea.style.display = 'none';
+                    if (fullArea) fullArea.style.display = 'block';
+                    return;
+                }
+                if (countdownArea) countdownArea.style.display = 'none';
+                if (activeArea) activeArea.style.display = 'block';
+                if (lebaranArea) lebaranArea.style.display = 'none';
+                if (fullArea) fullArea.style.display = 'none';
+                
+                loadWinnersFromStorage().then(winners => {
+                    let isWinner = winners.some(w => w.fingerprint === currentUser.fingerprint);
+                    let completed = (missionData.videoDownloads >= 100 && missionData.photoGenerates >= 100 && missionData.mp3Converts >= 10);
+                    let percent = Math.min(100, ((missionData.videoDownloads / 100) + (missionData.photoGenerates / 100) + (missionData.mp3Converts / 10)) / 3 * 100);
+                    
+                    const vc = document.getElementById('videoCount');
+                    const pc = document.getElementById('photoCount');
+                    const mc = document.getElementById('mp3Count');
+                    const pb = document.getElementById('missionProgressBar');
+                    const st = document.getElementById('missionStatusText');
+                    const cm = document.getElementById('claimMissionBtn');
+                    
+                    if (vc) vc.innerText = missionData.videoDownloads;
+                    if (pc) pc.innerText = missionData.photoGenerates;
+                    if (mc) mc.innerText = missionData.mp3Converts;
+                    if (pb) pb.style.width = percent + '%';
+                    
+                    if (isWinner) {
+                        if (st) st.innerHTML = '🏆 Anda sudah jadi pemenang!';
+                        if (cm) cm.style.display = 'none';
+                    } else if (completed && !currentUser.missionCompleted) {
+                        if (st) st.innerHTML = '✅ MISI SELESAI! Klik Klaim!';
+                        if (cm) cm.style.display = 'block';
+                    } else {
+                        if (st) st.innerHTML = `Progres ${Math.round(percent)}%`;
+                        if (cm) cm.style.display = 'none';
+                    }
+                });
+            } else {
+                if (countdownArea) countdownArea.style.display = 'none';
+                if (activeArea) activeArea.style.display = 'none';
+                if (lebaranArea) lebaranArea.style.display = 'block';
+                if (fullArea) fullArea.style.display = 'none';
+            }
+        }
+        
+        async function claimMission() {
+            if (!currentUser) {
+                showToast('Login dulu');
+                return;
+            }
+            if (ramadhanPhase !== 'active') {
+                showToast('🌙 Hanya saat Ramadhan');
+                return;
+            }
+            let winners = await loadWinnersFromStorage();
+            if (winners.length >= 3) {
+                showNotification("Misi Berakhir", "3 pemenang sudah ada");
+                updateMissionDisplay();
+                return;
+            }
+            if (missionData.videoDownloads >= 100 && missionData.photoGenerates >= 100 && missionData.mp3Converts >= 10 && !currentUser.missionCompleted) {
+                if (winners.some(w => w.fingerprint === currentUser.fingerprint)) {
+                    showToast('Sudah jadi pemenang');
+                    return;
+                }
+                let rank;
+                if (winners.length === 0) rank = 1;
+                else if (winners.length === 1) rank = 2;
+                else if (winners.length === 2) rank = 3;
+                else {
+                    showToast('Misi penuh');
+                    return;
+                }
+                let prizeText = rank === 1 ? "Rp50.000" : (rank === 2 ? "Rp20.000" : "Rp10.000");
+                showWinnerPopup(rank);
+                winners.push({
+                    name: currentUser.name,
+                    userId: currentUser.userId,
+                    fingerprint: currentUser.fingerprint,
+                    time: new Date().toISOString(),
+                    rank: rank,
+                    claimed: false,
+                    prize: prizeText
+                });
+                await saveWinnersToStorage(winners);
+                currentUser.missionCompleted = true;
+                currentUser.missionRank = rank;
+                await saveUserToStorage(currentUser);
+                if (winners.length >= 3) misiFull = true;
+                updateUI();
+                updateMissionDisplay();
+                updateWinnersList();
+                showNotification("🎉 SELAMAT!", `Anda juara ${rank} dengan hadiah ${prizeText}! Hubungi admin.`);
+            } else {
+                showToast('Selesaikan semua misi dulu!');
+            }
+        }
+        
+        async function updateWinnersList() {
+            let winners = await loadWinnersFromStorage();
+            let cont = document.getElementById('winnersListContainer');
+            if (!cont) return;
+            if (winners.length === 0) {
+                cont.innerHTML = '<div style="text-align:center;padding:10px;">Belum ada pemenang</div>';
+                return;
+            }
+            cont.innerHTML = winners.sort((a, b) => a.rank - b.rank).map(w => {
+                let prize = w.rank === 1 ? 'Rp50.000' : (w.rank === 2 ? 'Rp20.000' : 'Rp10.000');
+                let icon = w.rank === 1 ? '🏆' : (w.rank === 2 ? '🥈' : '🥉');
+                return `<div class="winner-item"><span>${icon} Pemenang ${w.rank}</span><span>${w.name}</span><span>${prize}</span></div>`;
+            }).join('');
+        }
+        
+        function showWinnerPopup(rank) {
+            let popup = document.getElementById('winnerPopup');
+            let prizeEl = document.getElementById('winnerPopupPrize');
+            let msgEl = document.getElementById('winnerPopupMessage');
+            if (!popup) return;
+            if (rank === 1) {
+                if (prizeEl) prizeEl.innerHTML = 'Rp50.000';
+                if (msgEl) msgEl.innerHTML = 'Anda JUARA 1! Hubungi admin.';
+            } else if (rank === 2) {
+                if (prizeEl) prizeEl.innerHTML = 'Rp20.000';
+                if (msgEl) msgEl.innerHTML = 'Anda JUARA 2! Hubungi admin.';
+            } else {
+                if (prizeEl) prizeEl.innerHTML = 'Rp10.000';
+                if (msgEl) msgEl.innerHTML = 'Anda JUARA 3! Hubungi admin.';
+            }
+            popup.classList.add('active');
+            setTimeout(() => popup.classList.remove('active'), 10000);
+        }
+        
+        function closeWinnerPopup() {
+            const popup = document.getElementById('winnerPopup');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function closeBanPopup() {
+            const popup = document.getElementById('banReasonPopup');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function closeRamadhanPopup() {
+            const popup = document.getElementById('ramadhanStartPopup');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function showInfoPage(p) {
+            let a = document.getElementById('aboutPage');
+            let b = document.getElementById('privacyPage');
+            let ba = document.getElementById('btnAbout');
+            let bb = document.getElementById('btnPrivacy');
+            if (p === 'about') {
+                if (a) a.classList.add('active-page');
+                if (b) b.classList.remove('active-page');
+                if (ba) ba.classList.add('active');
+                if (bb) bb.classList.remove('active');
+            } else {
+                if (a) a.classList.remove('active-page');
+                if (b) b.classList.add('active-page');
+                if (ba) ba.classList.remove('active');
+                if (bb) bb.classList.add('active');
+            }
+        }
+        
+        // ========================================
+        // DETEKSI RAMADHAN
+        // ========================================
+        async function checkRamadhanReal() {
+            let today = new Date();
+            let year = today.getFullYear();
+            let start = new Date(year, 1, 18);
+            if (today > start) start = new Date(year + 1, 1, 8);
+            let daysLeft = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+            let isRamadhan = daysLeft <= 0 && daysLeft > -30;
+            let isLebaran = daysLeft <= -30;
+            
+            if (isRamadhan) ramadhanPhase = 'active';
+            else if (isLebaran) ramadhanPhase = 'lebaran';
+            else ramadhanPhase = 'countdown';
+            ramadhanDaysLeft = Math.abs(daysLeft);
+            
+            document.body.classList.remove('ramadhan', 'lebaran');
+            if (ramadhanPhase === 'active') document.body.classList.add('ramadhan');
+            if (ramadhanPhase === 'lebaran') document.body.classList.add('lebaran');
+            
+            let hs = document.getElementById('ramadhanStatus');
+            let cd = document.getElementById('ramadhanCountdown');
+            if (ramadhanPhase === 'active') {
+                if (hs) hs.innerHTML = '🌙 Selamat Bulan Ramadhan! 🌙';
+                if (cd) cd.innerHTML = `📅 Ramadhan ${today.getFullYear()}`;
+            } else if (ramadhanPhase === 'lebaran') {
+                if (hs) hs.innerHTML = '🌙 Taqabbalallahu minna wa minkum';
+                if (cd) cd.innerHTML = '📅 Idul Fitri 1447 H';
+            } else {
+                if (hs) hs.innerHTML = '🌙 Menunggu Bulan Ramadhan';
+                if (cd) cd.innerHTML = `⏳ ${ramadhanDaysLeft} hari menuju Ramadhan`;
+            }
+            updateMissionDisplay();
+            await checkAndResetRamadhanMission();
+        }
+        
+        // ========================================
+        // API TIKTOK
+        // ========================================
+        const VIDEO_APIS = [{
+            handler: async (url) => {
+                if (!TIKTOK_API_URL) {
+                    showToast('❌ TikTok API URL tidak dikonfigurasi');
+                    return null;
+                }
+                try {
+                    let res = await fetch(`${TIKTOK_API_URL}?url=${encodeURIComponent(url)}`);
+                    let data = await res.json();
+                    if (data.code === 0 && data.data) {
+                        let upload = '-';
+                        if (data.data.create_time) {
+                            let d = new Date(data.data.create_time * 1000);
+                            upload = d.toLocaleDateString('id-ID');
+                        }
+                        return {
+                            success: true,
+                            hdUrl: data.data.hdplay || data.data.play,
+                            sdUrl: data.data.play,
+                            title: data.data.title || 'TikTok Video',
+                            author: data.data.author?.nickname || '@user',
+                            duration: formatDuration(data.data.duration || 0),
+                            thumbnail: data.data.cover,
+                            size: data.data.size ? (data.data.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
+                            images: data.data.images || [],
+                            uploadDate: upload
+                        };
+                    }
+                    return null;
+                } catch (e) {
+                    console.error('TikTok API Error:', e);
+                    return null;
+                }
+            }
+        }];
+        
+        async function downloadTikTok() {
+            const urlInput = document.getElementById('tiktokUrl');
+            if (!urlInput) {
+                showToast('❌ Input tidak ditemukan');
+                return;
+            }
+            
+            let url = urlInput.value.trim();
+            if (!url) {
+                showToast('Masukkan link TikTok!');
+                return;
+            }
+            
+            const loading = document.getElementById('videoLoading');
+            if (loading) loading.style.display = 'block';
+            
+            let videoData = null;
+            for (let api of VIDEO_APIS) {
+                try {
+                    let d = await api.handler(url);
+                    if (d && d.success) {
+                        videoData = d;
+                        break;
+                    }
+                } catch (e) {}
+            }
+            
+            if (videoData) {
+                currentVideoData = videoData;
+                const thumb = document.getElementById('videoThumb');
+                const title = document.getElementById('videoTitle');
+                const author = document.getElementById('videoAuthor');
+                const duration = document.getElementById('videoDuration');
+                const size = document.getElementById('videoSize');
+                const link = document.getElementById('downloadLink');
+                const result = document.getElementById('videoResult');
+                
+                if (thumb) thumb.src = videoData.thumbnail;
+                if (title) title.innerText = videoData.title;
+                if (author) author.innerText = '@' + videoData.author;
+                if (duration) duration.innerText = videoData.duration;
+                if (size) size.innerText = videoData.size;
+                if (link) link.href = videoData.hdUrl;
+                if (result) result.classList.add('active');
+                
+                await updateDownloadStats();
+                await updateMissionStats('video');
+                showToast('✅ Video siap!');
+            } else {
+                showToast('❌ Gagal ambil video. Coba link lain.');
+            }
+            
+            if (loading) loading.style.display = 'none';
+        }
+        
+        function selectQuality(q) {
+            currentQuality = q;
+            const link = document.getElementById('downloadLink');
+            const quality = document.getElementById('videoQuality');
+            if (link) link.href = q === 'hd' ? currentVideoData?.hdUrl : currentVideoData?.sdUrl;
+            if (quality) quality.innerText = q === 'hd' ? 'HD' : 'SD';
+        }
+        
+        function clearTikTok() {
+            const input = document.getElementById('tiktokUrl');
+            const result = document.getElementById('videoResult');
+            if (input) input.value = '';
+            if (result) result.classList.remove('active');
+            currentVideoData = null;
+        }
+        
+        // ========================================
+        // GENERATOR FOTO
+        // ========================================
+        async function generateThumbnail() {
+            const urlInput = document.getElementById('watermarkUrl');
+            if (!urlInput) {
+                showToast('❌ Input tidak ditemukan');
+                return;
+            }
+            
+            let url = urlInput.value.trim();
+            if (!url || !url.includes('tiktok.com')) {
+                showToast('Link TikTok valid!');
+                return;
+            }
+            
+            const loading = document.getElementById('watermarkLoading');
+            if (loading) loading.style.display = 'block';
+            
+            try {
+                for (let api of VIDEO_APIS) {
+                    let data = await api.handler(url);
+                    if (data && data.success && data.thumbnail) {
+                        currentWatermarkUrl = data.thumbnail;
+                        let imgRes = await fetch(currentWatermarkUrl);
+                        currentWatermarkBlob = await imgRes.blob();
+                        
+                        const img = document.getElementById('watermarkImage');
+                        const buttons = document.getElementById('watermarkButtons');
+                        const result = document.getElementById('watermarkResult');
+                        
+                        if (img) {
+                            img.src = currentWatermarkUrl;
+                            img.style.display = 'block';
+                        }
+                        if (buttons) buttons.style.display = 'flex';
+                        if (result) result.classList.add('active');
+                        
+                        await updateMissionStats('photo');
+                        showToast('Thumbnail siap!');
+                        break;
+                    }
+                }
+            } catch (e) {
+                showToast('Gagal ambil thumbnail');
+            }
+            
+            if (loading) loading.style.display = 'none';
+        }
+        
+        function downloadSingleImage() {
+            if (currentWatermarkBlob) {
+                let u = URL.createObjectURL(currentWatermarkBlob);
+                let a = document.createElement('a');
+                a.href = u;
+                a.download = `thumb_${Date.now()}.jpg`;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(u), 100);
+                showToast('Gambar disimpan!');
+            }
+        }
+        
+        function copyWatermarkLink() {
+            if (currentWatermarkUrl) {
+                copyToClipboard(currentWatermarkUrl);
+            }
+        }
+        
+        async function generateMultipleFrames() {
+            const urlInput = document.getElementById('watermarkUrl');
+            if (!urlInput) {
+                showToast('❌ Input tidak ditemukan');
+                return;
+            }
+            
+            let url = urlInput.value.trim();
+            if (!url || !url.includes('tiktok.com')) {
+                showToast('Link TikTok valid!');
+                return;
+            }
+            
+            const result = document.getElementById('watermarkResult');
+            const multiResult = document.getElementById('multipleFramesResult');
+            if (result) result.classList.remove('active');
+            if (multiResult) multiResult.style.display = 'none';
+            
+            const loadingDiv = document.getElementById('multiFrameLoading');
+            const progBar = document.getElementById('multiFrameProgress');
+            if (loadingDiv) loadingDiv.style.display = 'block';
+            if (progBar) progBar.style.width = '0%';
+            
+            if (framesList.length) {
+                framesList.forEach(f => {
+                    if (f.url && f.url.startsWith('blob:')) URL.revokeObjectURL(f.url);
+                });
+                framesList = [];
+            }
+            
+            try {
+                if (progBar) progBar.style.width = '30%';
+                const statusText = document.getElementById('multiFrameStatusText');
+                if (statusText) statusText.innerHTML = 'Mengambil data...';
+                
+                let videoData = null;
+                for (let api of VIDEO_APIS) {
+                    let data = await api.handler(url);
+                    if (data && data.success && data.thumbnail) {
+                        videoData = data;
+                        break;
+                    }
+                }
+                if (!videoData) throw new Error('No data');
+                
+                if (progBar) progBar.style.width = '60%';
+                if (statusText) statusText.innerHTML = 'Memproses gambar...';
+                
+                let images = [];
+                if (videoData.images && videoData.images.length) {
+                    for (let i = 0; i < Math.min(videoData.images.length, 9); i++) {
+                        let res = await fetch(videoData.images[i]);
+                        let blob = await res.blob();
+                        images.push({
+                            blob,
+                            url: URL.createObjectURL(blob),
+                            name: `slide_${i+1}_${Date.now()}.jpg`,
+                            label: `Slide ${i+1}`
+                        });
+                    }
+                }
+                if (images.length === 0) throw new Error('Tidak ada slide');
+                framesList = images;
+                
+                if (progBar) progBar.style.width = '100%';
+                if (statusText) statusText.innerHTML = `✅ Selesai! ${framesList.length} slide`;
+                
+                await updateMissionStats('photo');
+                
+                setTimeout(() => {
+                    if (loadingDiv) loadingDiv.style.display = 'none';
+                    let gallery = document.getElementById('framesGallery');
+                    if (gallery) {
+                        gallery.innerHTML = '';
+                        framesList.forEach((f, i) => {
+                            let div = document.createElement('div');
+                            div.className = 'gallery-item';
+                            div.innerHTML = `<div class="frame-time">${f.label}</div><img src="${f.url}"><div class="download-single" onclick="event.stopPropagation(); downloadSingleFrame(${i})"><i class="fas fa-download"></i></div>`;
+                            div.onclick = () => downloadSingleFrame(i);
+                            gallery.appendChild(div);
+                        });
+                    }
+                    const multiResult2 = document.getElementById('multipleFramesResult');
+                    if (multiResult2) multiResult2.style.display = 'block';
+                    showToast(`✅ ${framesList.length} slide foto berhasil!`);
+                }, 500);
+            } catch (e) {
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                showToast('❌ Gagal ambil slide foto');
+            }
+        }
+        
+        function downloadSingleFrame(i) {
+            let f = framesList[i];
+            if (f && f.blob) {
+                let u = URL.createObjectURL(f.blob);
+                let a = document.createElement('a');
+                a.href = u;
+                a.download = f.name;
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(u), 100);
+                showToast('✅ Gambar disimpan!');
+            }
+        }
+        
+        function downloadAllFrames() {
+            if (!framesList.length) {
+                showToast('Tidak ada gambar');
+                return;
+            }
+            showToast(`📥 Mengunduh ${framesList.length} gambar...`);
+            framesList.forEach((_, i) => {
+                setTimeout(() => downloadSingleFrame(i), i * 400);
+            });
+        }
+        
+        function closeMultipleFrames() {
+            const result = document.getElementById('multipleFramesResult');
+            if (result) result.style.display = 'none';
+            if (framesList) {
+                framesList.forEach(f => {
+                    if (f.url && f.url.startsWith('blob:')) URL.revokeObjectURL(f.url);
+                });
+                framesList = [];
+            }
+        }
+        
+        // ========================================
+        // MP3 CONVERTER
+        // ========================================
+        function handleVideoSelect() {
+            let inp = document.getElementById('videoFileInput');
+            if (inp && inp.files.length) {
+                selectedVideoFile = inp.files[0];
+                document.getElementById('mp3Result').classList.remove('active');
+            }
+        }
+        
+        function resetMP3() {
+            const input = document.getElementById('videoFileInput');
+            const result = document.getElementById('mp3Result');
+            if (input) input.value = '';
+            if (result) result.classList.remove('active');
+            selectedVideoFile = null;
+        }
+        
+        async function convertToMP3() {
+            if (!selectedVideoFile) {
+                showToast('Pilih file video!');
+                return;
+            }
+            
+            const loading = document.getElementById('mp3Loading');
+            if (loading) loading.style.display = 'block';
+            
+            try {
+                let audioBlob = await extractAudio(selectedVideoFile);
+                let audioUrl = URL.createObjectURL(audioBlob);
+                
+                const preview = document.getElementById('audioPreview');
+                const link = document.getElementById('mp3DownloadLink');
+                const name = document.getElementById('mp3FileName');
+                const size = document.getElementById('mp3FileSize');
+                const result = document.getElementById('mp3Result');
+                
+                if (preview) preview.src = audioUrl;
+                if (link) link.href = audioUrl;
+                
+                let mp3Name = selectedVideoFile.name.replace(/\.[^/.]+$/, '') + '.mp3';
+                if (link) link.setAttribute('download', mp3Name);
+                if (name) name.innerText = selectedVideoFile.name;
+                if (size) size.innerText = (audioBlob.size / 1024 / 1024).toFixed(1) + ' MB';
+                if (result) result.classList.add('active');
+                
+                if (currentUser) {
+                    currentUser.totalMP3++;
+                    await saveUserToStorage(currentUser);
+                    updateUI();
+                    await updateMissionStats('mp3');
+                }
+                showToast('✅ MP3 berhasil!');
+            } catch (e) {
+                showToast('❌ Gagal konversi');
+            }
+            
+            if (loading) loading.style.display = 'none';
+        }
+        
+        function extractAudio(file) {
+            return new Promise((resolve, reject) => {
+                let video = document.createElement('video');
+                let url = URL.createObjectURL(file);
+                video.src = url;
+                video.onloadedmetadata = () => {
+                    try {
+                        let ctx = new(window.AudioContext || window.webkitAudioContext)();
+                        let source = ctx.createMediaElementSource(video);
+                        let dest = ctx.createMediaStreamDestination();
+                        source.connect(dest);
+                        let recorder = new MediaRecorder(dest.stream);
+                        let chunks = [];
+                        recorder.ondataavailable = e => chunks.push(e.data);
+                        recorder.onstop = () => {
+                            let blob = new Blob(chunks, { type: 'audio/mpeg' });
+                            URL.revokeObjectURL(url);
+                            resolve(blob);
+                        };
+                        recorder.start();
+                        video.play().then(() => {
+                            setTimeout(() => {
+                                video.pause();
+                                recorder.stop();
+                                source.disconnect();
+                            }, video.duration * 1000);
+                        }).catch(reject);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                video.onerror = reject;
+            });
+        }
+        
+        // ========================================
+        // IG DOWNLOADER - COMING SOON
+        // ========================================
+        function downloadInstagram() {
+            showToast('🚀 Fitur Instagram Downloader Coming Soon!');
+        }
+        
+        // ========================================
+        // AI HELPER
+        // ========================================
+        function addAIMessage(msg, type) {
+            const container = document.getElementById('aiChatContainer');
+            if (!container) return;
+            
+            const div = document.createElement('div');
+            div.className = `ai-message ${type}`;
+            
+            const icon = type === 'user' ? '👤' : '🤖';
+            const name = type === 'user' ? 'Anda' : 'WaterTik AI';
+            
+            let messageText = msg || (type === 'user' ? '(pesan kosong)' : 'Maaf, saya sedang sibuk. Coba tanyakan lagi ya!');
+            messageText = sanitizeInput(messageText);
+            
+            div.innerHTML = `
+                <div class="msg-header">
+                    <span class="ai-icon">${icon}</span> ${name}
+                </div>
+                <div class="msg-content">${messageText.replace(/\n/g, '<br>')}</div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            const indicator = document.getElementById('aiTypingIndicator');
+            if (indicator) indicator.style.display = 'block';
+            const container = document.getElementById('aiChatContainer');
+            if (container) container.scrollTop = container.scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('aiTypingIndicator');
+            if (indicator) indicator.style.display = 'none';
+        }
+        
+        function showRateLimit(waitTime) {
+            const rateLimitDiv = document.getElementById('aiRateLimit');
+            const countdownSpan = document.getElementById('rateLimitCountdown');
+            if (rateLimitDiv) rateLimitDiv.classList.add('active');
+            if (countdownSpan) countdownSpan.textContent = waitTime;
+            
+            let remaining = waitTime;
+            const interval = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    if (rateLimitDiv) rateLimitDiv.classList.remove('active');
+                } else {
+                    if (countdownSpan) countdownSpan.textContent = remaining;
+                }
+            }, 1000);
+        }
+        
+        function disableAIInputs(disabled) {
+            const input = document.getElementById('aiQuestion');
+            const btn = document.getElementById('sendAIbtn');
+            if (input) input.disabled = disabled;
+            if (btn) btn.disabled = disabled;
+        }
+        
+        async function askAI() {
+            const input = document.getElementById('aiQuestion');
+            if (!input) {
+                showToast('❌ Input AI tidak ditemukan');
+                return;
+            }
+            
+            const question = sanitizeInput(input.value.trim());
+            
+            if (!question) {
+                showToast('Masukkan pertanyaan dulu!');
+                return;
+            }
+            
+            if (!CEREBRAS_API_KEY || !CEREBRAS_API_URL) {
+                showToast('❌ API AI tidak dikonfigurasi!');
+                return;
+            }
+            
+            const now = Date.now();
+            const timeSinceLast = now - lastRequestTime;
+            
+            if (timeSinceLast < MIN_INTERVAL) {
+                const waitTime = Math.ceil((MIN_INTERVAL - timeSinceLast) / 1000);
+                showRateLimit(waitTime);
+                return;
+            }
+            
+            if (isRequesting) {
+                showToast('⏳ Tunggu request sebelumnya selesai...');
+                return;
+            }
+            
+            isRequesting = true;
+            disableAIInputs(true);
+            addAIMessage(question, 'user');
+            input.value = '';
+            showTypingIndicator();
+            
+            try {
+                lastRequestTime = Date.now();
+                
+                const response = await fetch(CEREBRAS_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CEREBRAS_API_KEY}`,
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        model: CEREBRAS_MODEL,
+                        messages: [
+                            { role: 'system', content: AI_SYSTEM_PROMPT },
+                            { role: 'user', content: question }
+                        ],
+                        temperature: 0.8,
+                        max_tokens: 800
+                    })
+                });
+                
+                hideTypingIndicator();
+                
+                if (!response.ok) {
+                    let errorMsg = 'Maaf, ada masalah. ';
+                    if (response.status === 429) {
+                        errorMsg += 'Terlalu banyak request. Tunggu 5 detik lalu coba lagi.';
+                    } else if (response.status === 401) {
+                        errorMsg += 'API Key tidak valid.';
+                    } else if (response.status === 500) {
+                        errorMsg += 'Server AI sibuk. Coba lagi nanti.';
+                    } else {
+                        errorMsg += `Error ${response.status}.`;
+                    }
+                    addAIMessage(errorMsg, 'bot');
+                    showToast('❌ Gagal');
+                    isRequesting = false;
+                    disableAIInputs(false);
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.choices && data.choices.length > 0) {
+                    const aiResponse = data.choices[0].message?.content;
+                    if (aiResponse && aiResponse.trim().length > 0) {
+                        addAIMessage(aiResponse, 'bot');
+                    } else {
+                        addAIMessage('Hmm, coba tanyakan hal lain ya! 😊', 'bot');
+                    }
+                } else {
+                    addAIMessage('Format respons tidak dikenali. Coba lagi.', 'bot');
+                }
+                
+            } catch (error) {
+                hideTypingIndicator();
+                console.error('AI Error:', error);
+                addAIMessage('❌ Gagal terhubung ke AI. Cek koneksi internet.', 'bot');
+                showToast('❌ Gagal konek');
+            }
+            
+            isRequesting = false;
+            disableAIInputs(false);
+        }
+        
+        function quickAsk(question) {
+            const input = document.getElementById('aiQuestion');
+            if (input) {
+                input.value = question;
+                askAI();
+            }
+        }
+        
+        function clearChat() {
+            const container = document.getElementById('aiChatContainer');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="ai-message bot">
+                    <div class="msg-header">
+                        <span class="ai-icon">🤖</span> WaterTik AI Assistant
+                    </div>
+                    <div class="msg-content">
+                        <strong>Assalamu'alaikum! 👋</strong><br><br>
+                        Saya <strong>WaterTik AI</strong>, asisten pintar yang siap membantu kamu!<br><br>
+                        ✨ <strong>Kemampuan saya:</strong><br>
+                        • 🗣️ Ngobrol santai & curhat<br>
+                        • 📚 Bantu belajar (Matematika, IPA, Bahasa, dll)<br>
+                        • 💻 Bantu coding (HTML, CSS, JS, Python, PHP)<br>
+                        • 💰 Tips keuangan & investasi<br>
+                        • 🎨 Ide kreatif & hiburan<br>
+                        • 📱 Bantu penggunaan WaterTik<br><br>
+                        <strong>Tanyakan apa saja ya! 😊</strong>
+                    </div>
+                </div>
+            `;
+            showToast('Chat dibersihkan');
+        }
+        
+        // ========================================
+        // FUNGSI NAVIGASI
+        // ========================================
+        async function pasteLink(id) {
+            let t = document.getElementById(id);
+            if (!t) {
+                showToast('❌ Input tidak ditemukan');
+                return;
+            }
+            try {
+                let txt = await navigator.clipboard.readText();
+                if (txt) {
+                    t.value = txt.trim();
+                    showToast('✅ Link di-paste!');
+                    t.focus();
+                }
+            } catch (e) {
+                showToast('❌ Gagal paste');
+            }
+        }
+        
+        function switchTab(t) {
+            document.querySelectorAll('.main-tab').forEach(tab => tab.classList.remove('active'));
+            const target = document.getElementById(`${t}Tab`);
+            if (target) target.classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            const navBtn = document.querySelector(`.nav-item[data-nav="${t}"]`);
+            if (navBtn) navBtn.classList.add('active');
+        }
+        
+        function openKontakPopup() {
+            const popup = document.getElementById('kontakPopup');
+            if (popup) popup.classList.add('active');
+        }
+        
+        function closeKontakPopup() {
+            const popup = document.getElementById('kontakPopup');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function openPremiumModal() {
+            const popup = document.getElementById('premiumModal');
+            if (popup) popup.classList.add('active');
+        }
+        
+        function closePremiumModal() {
+            const popup = document.getElementById('premiumModal');
+            if (popup) popup.classList.remove('active');
+        }
+        
+        function setCurrentDate() {
+            const el = document.getElementById('currentDate');
+            if (el) {
+                el.innerText = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+        }
+        
+        // ========================================
+        // AVATAR
+        // ========================================
+        function openDashboard() {
+            const modal = document.getElementById('dashboardModal');
+            if (!modal) return;
+            
+            modal.classList.add('active');
+            let p = document.getElementById('avatarPreviewModal');
+            if (p) {
+                if (currentUser && currentUser.avatar) p.innerHTML = `<img src="${currentUser.avatar}" style="width:100%;height:100%;object-fit:cover;">`;
+                else p.innerHTML = '<i class="fas fa-user"></i>';
+            }
+        }
+        
+        function closeDashboard() {
+            const modal = document.getElementById('dashboardModal');
+            if (modal) modal.classList.remove('active');
+        }
+        
+        function uploadAvatar() {
+            const input = document.getElementById('avatarInput');
+            if (input) input.click();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarInput = document.getElementById('avatarInput');
+            if (avatarInput) {
+                avatarInput.addEventListener('change', async function(e) {
+                    let file = e.target.files[0];
+                    if (!file) {
+                        showToast('Pilih file');
+                        return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                        showToast('Maksimal 2MB');
+                        return;
+                    }
+                    if (!file.type.startsWith('image/')) {
+                        showToast('Harus gambar');
+                        return;
+                    }
+                    let reader = new FileReader();
+                    reader.onload = async function(evt) {
+                        if (currentUser) {
+                            currentUser.avatar = evt.target.result;
+                            await saveUserToStorage(currentUser);
+                            updateUI();
+                            showToast('✅ Avatar diupload!');
+                            closeDashboard();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                    e.target.value = '';
+                });
+            }
+        });
+        
+        async function removeAvatar() {
+            if (currentUser && confirm('Hapus avatar?')) {
+                currentUser.avatar = null;
+                await saveUserToStorage(currentUser);
+                updateUI();
+                showToast('Avatar dihapus');
+                closeDashboard();
+            }
+        }
+        
+        // ========================================
+        // REPORT BUG
+        // ========================================
+        function openReportModal() {
+            const modal = document.getElementById('reportBugModal');
+            if (!modal) return;
+            
+            modal.classList.add('active');
+            const nameInput = document.getElementById('reportName');
+            if (nameInput && currentUser && currentUser.name) {
+                nameInput.value = currentUser.name;
+            }
+            
+            const systemInput = document.getElementById('reportSystem');
+            if (systemInput) {
+                let ua = navigator.userAgent;
+                let browser = ua.includes('Chrome') ? 'Chrome' : (ua.includes('Firefox') ? 'Firefox' : 'Other');
+                let os = ua.includes('Win') ? 'Windows' : (ua.includes('Android') ? 'Android' : 'Other');
+                systemInput.value = `${browser}, ${os}`;
+            }
+        }
+        
+        function closeReportModal() {
+            const modal = document.getElementById('reportBugModal');
+            if (modal) modal.classList.remove('active');
+        }
+        
+        function sendBugReport() {
+            let name = document.getElementById('reportName')?.value.trim() || '';
+            let title = document.getElementById('reportTitle')?.value.trim() || '';
+            let desc = document.getElementById('reportDesc')?.value.trim() || '';
+            
+            if (!name || !title || !desc) {
+                showToast('Isi semua field!');
+                return;
+            }
+            
+            let userId = currentUser ? currentUser.userId : 'Guest';
+            let body = `Nama: ${name}\nUser ID: ${userId}\nJudul: ${title}\nDeskripsi: ${desc}\nWaktu: ${new Date().toLocaleString()}`;
+            window.location.href = `mailto:dllweb9@gmail.com?subject=[BUG] ${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+            showToast('Email client akan terbuka');
+            closeReportModal();
+        }
+        
+        // ========================================
+        // KEYBOARD SHORTCUT
+        // ========================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('.main-tab.active');
+                if (activeTab && activeTab.id === 'aiTab') {
+                    const input = document.getElementById('aiQuestion');
+                    if (document.activeElement === input && input && !input.disabled) {
+                        e.preventDefault();
+                        askAI();
+                    }
+                }
+            }
+        });
+        
+        // ========================================
+        // INIT
+        // ========================================
+        (async function init() {
+            console.log('🚀 WaterTik v5.0 - Starting...');
+            
+            await getFingerprint();
+            await checkMaintenance();
+            await checkRamadhanReal();
+            setCurrentDate();
+            await updateWinnersList();
+            
+            let fp = await getFingerprint();
+            if (!await checkBlockedUser(fp)) {
+                let existing = await loadUserFromStorage(fp);
+                if (existing && !existing.blocked) {
+                    currentUser = existing;
+                    let fbMission = await loadMissionFromStorage(fp);
+                    if (fbMission) missionData = fbMission;
+                    updateUI();
+                    console.log('✅ User loaded:', currentUser.name);
+                }
+            }
+            
+            const reportBtn = document.getElementById('reportBugBtn');
+            if (reportBtn) {
+                reportBtn.addEventListener('click', openReportModal);
+            }
+            
+            const sendBtn = document.getElementById('sendReportBtn');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendBugReport);
+            }
+            
+            setInterval(checkRamadhanReal, 60000);
+            setInterval(async () => {
+                await checkMaintenance();
+                let fpx = await getFingerprint();
+                await checkBlockedUser(fpx);
+            }, 5000);
+            
+            console.log('✅ WaterTik v5.0 - Siap digunakan!');
+            console.log('✅ AI dengan Rate Limit 5 detik');
+            console.log('✅ Instagram Downloader Coming Soon!');
+        })();
+        
+        // ========================================
+        // WINDOW CLICK CLOSE MODALS
+        // ========================================
+        window.onclick = function(e) {
+            const modals = [
+                'dashboardModal', 'kontakPopup', 'premiumModal', 
+                'winnerPopup', 'banReasonPopup', 'ramadhanStartPopup',
+                'reportBugModal', 'notificationPopup'
+            ];
+            
+            modals.forEach(id => {
+                const el = document.getElementById(id);
+                if (e.target === el && el) {
+                    el.classList.remove('active');
+                }
+            });
+        };
+        
+        // ========================================
+        // EXPOSE FUNGSI KE GLOBAL
+        // ========================================
+        window.switchTab = switchTab;
+        window.downloadTikTok = downloadTikTok;
+        window.selectQuality = selectQuality;
+        window.clearTikTok = clearTikTok;
+        window.pasteLink = pasteLink;
+        window.generateThumbnail = generateThumbnail;
+        window.generateMultipleFrames = generateMultipleFrames;
+        window.downloadSingleImage = downloadSingleImage;
+        window.copyWatermarkLink = copyWatermarkLink;
+        window.downloadAllFrames = downloadAllFrames;
+        window.closeMultipleFrames = closeMultipleFrames;
+        window.handleVideoSelect = handleVideoSelect;
+        window.convertToMP3 = convertToMP3;
+        window.resetMP3 = resetMP3;
+        window.attemptLogin = attemptLogin;
+        window.claimMission = claimMission;
+        window.openDashboard = openDashboard;
+        window.closeDashboard = closeDashboard;
+        window.openKontakPopup = openKontakPopup;
+        window.closeKontakPopup = closeKontakPopup;
+        window.openPremiumModal = openPremiumModal;
+        window.closePremiumModal = closePremiumModal;
+        window.closeWinnerPopup = closeWinnerPopup;
+        window.closeBanPopup = closeBanPopup;
+        window.closeRamadhanPopup = closeRamadhanPopup;
+        window.closeNotificationPopup = closeNotificationPopup;
+        window.copyUserId = copyUserId;
+        window.uploadAvatar = uploadAvatar;
+        window.removeAvatar = removeAvatar;
+        window.copyToClipboard = copyToClipboard;
+        window.showToast = showToast;
+        window.showInfoPage = showInfoPage;
+        window.askAI = askAI;
+        window.quickAsk = quickAsk;
+        window.clearChat = clearChat;
+        window.downloadInstagram = downloadInstagram;
+        
+        console.log('✅ All functions exposed to global scope');
+    </script>
+</body>
+  </html>
