@@ -7,12 +7,15 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       
-      - name: Create config.js from secrets
+      - name: Buat config.js
         run: |
-          echo "window.__CONFIG = {" > js/config.js
+          mkdir -p js
+          echo "const CONFIG = {" > js/config.js
           echo "  firebase: {" >> js/config.js
           echo "    apiKey: '${{ secrets.FIREBASE_API_KEY }}'," >> js/config.js
           echo "    authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}'," >> js/config.js
@@ -30,10 +33,10 @@ jobs:
           echo "    apiUrl: '${{ secrets.TIKTOK_API_URL }}'" >> js/config.js
           echo "  }" >> js/config.js
           echo "};" >> js/config.js
-          echo "Object.freeze(window.__CONFIG);" >> js/config.js
-          echo "console.log('✅ Config injected from secrets');" >> js/config.js
+          echo "window.__CONFIG = CONFIG;" >> js/config.js
+          echo "console.log('Config loaded');" >> js/config.js
       
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
