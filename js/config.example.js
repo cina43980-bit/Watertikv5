@@ -1,25 +1,20 @@
-// 🔒 API key diisi dari GitHub Secrets
-// Jangan edit file ini, nanti diisi otomatis oleh GitHub Actions
-
+// File ini cuma contoh, API key diisi otomatis oleh GitHub Actions
 const CONFIG = {
     firebase: {
-        apiKey: "ISI_DARI_SECRETS",
-        authDomain: "ISI_DARI_SECRETS",
-        projectId: "ISI_DARI_SECRETS",
-        storageBucket: "ISI_DARI_SECRETS",
-        messagingSenderId: "ISI_DARI_SECRETS",
-        appId: "ISI_DARI_SECRETS"
+        apiKey: "ISI_API_KEY",
+        authDomain: "ISI_AUTH_DOMAIN",
+        projectId: "ISI_PROJECT_ID",
+        storageBucket: "ISI_STORAGE_BUCKET",
+        messagingSenderId: "ISI_SENDER_ID",
+        appId: "ISI_APP_ID"
     },
     cerebras: {
-        apiKey: "ISI_DARI_SECRETS",
-        apiUrl: "ISI_DARI_SECRETS",
-        model: "ISI_DARI_SECRETS"
+        apiKey: "ISI_API_KEY",
+        apiUrl: "ISI_API_URL",
+        model: "ISI_MODEL"
     },
     tiktok: {
-        apiUrl: "ISI_DARI_SECRETS"
+        apiUrl: "ISI_TIKTOK_API_URL"
     }
 };
-
-// JANGAN UBAH KODE DI BAWAH INI!
 window.__CONFIG = CONFIG;
-console.log('⏳ Menunggu config dari GitHub Secrets...');
