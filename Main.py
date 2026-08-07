@@ -1,70 +1,55 @@
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
-from dotenv import load_dotenv
-
-# Load environment variables (untuk API Key)
-load_dotenv()
+import os
 
 app = FastAPI()
 
-# --- KONFIGURASI RAHASIA ---
-# Jangan pernah tulis API Key langsung di kode ini!
-# Nanti API Key dimasukkan lewat dashboard hosting (Render/Vercel/Railway)
-CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY") 
-CEREBRAS_API_URL = "https://api.cerebras.ai/v1/chat/completions"
-CEREBRAS_MODEL = "llama3.1-8b" # Bisa ganti model sesuai akun kamu
-
 # --- SETTING CORS ---
-# Mengizinkan HTML di GitHub Pages untuk akses API ini
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Di production, ganti * dengan URL GitHub Pages kamu
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- MODEL REQUEST ---
+# --- MODEL AI ---
 class AIRequest(BaseModel):
     question: str
 
-# --- ENDPOINT UTAMA AI ---
+# ========================================
+# ENDPOINT AI (GROQ)
+# ========================================
 @app.post("/api/ask-ai")
 async def ask_ai(data: AIRequest):
-    # Cek apakah API Key terisi
-    if not CEREBRAS_API_KEY:
-        return {
-            "status": "error", 
-            "message": "API Key Cerebras belum disetting di server!"
-        }
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    
+    if not GROQ_API_KEY:
+        return {"status": "error", "message": "API Key Groq belum disetting di Render!"}
     
     try:
         headers = {
-            "Authorization": f"Bearer {CEREBRAS_API_KEY}",
+            "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json"
         }
         
-        # System prompt ala WaterTik
-        system_prompt = "Kamu adalah WaterTik AI Assistant. Jawab pertanyaan dengan Bahasa Indonesia yang santai, natural, dan ramah."
-        
         payload = {
-            "model": CEREBRAS_MODEL,
+            "model": "llama3-8b-8192",
             "messages": [
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": "Kamu adalah WaterTik AI Assistant. Jawab dengan Bahasa Indonesia yang santai."},
                 {"role": "user", "content": data.question}
             ],
             "temperature": 0.8,
-            "max_tokens": 800
+            "max_tokens": 800,
+            "stream": False
         }
         
-        # Kirim request ke Cerebras
-        response = requests.post(CEREBRAS_API_URL, headers=headers, json=payload)
+        response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
         
         if response.status_code != 200:
-            return {"status": "error", "message": f"Error dari Cerebras: {response.status_code}"}
+            return {"status": "error", "message": f"Error dari Groq: {response.status_code}"}
             
         result = response.json()
         ai_response = result["choices"][0]["message"]["content"]
@@ -74,7 +59,26 @@ async def ask_ai(data: AIRequest):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# --- ENDPOINT CEK SERVER (Opsional) ---
+# ========================================
+# ENDPOINT TIKTOK (Download, Generator, Slide)
+# ========================================
+@app.get("/api/tiktok")
+async def tiktok_download(url: str):
+    TIKTOK_API_URL = os.getenv("TIKTOK_API_URL")
+    
+    if not TIKTOK_API_URL:
+        return {"status": "error", "message": "TikTok API URL belum disetting di Render!"}
+    
+    try:
+        response = requests.get(f"{TIKTOK_API_URL}?url={url}")
+        data = response.json()
+        return {"status": "success", "data": data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+# ========================================
+# CEK SERVER
+# ========================================
 @app.get("/")
 def read_root():
     return {"message": "WaterTik API is running!"}
