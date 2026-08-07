@@ -4062,7 +4062,102 @@
                     }
                 }
             }
-
+        });
+        
+        // ========================================
+        // INIT
+        // ========================================
+        (async function init() {
+            console.log('🚀 WaterTik v5.0 - Starting...');
+            
+            await getFingerprint();
+            await checkMaintenance();
+            await checkRamadhanReal();
+            setCurrentDate();
+            await updateWinnersList();
+            
+            let fp = await getFingerprint();
+            if (!await checkBlockedUser(fp)) {
+                let existing = await loadUserFromStorage(fp);
+                if (existing && !existing.blocked) {
+                    currentUser = existing;
+                    let fbMission = await loadMissionFromStorage(fp);
+                    if (fbMission) missionData = fbMission;
+                    updateUI();
+                    console.log('✅ User loaded:', currentUser.name);
+                }
+            }
+            
+            const reportBtn = document.getElementById('reportBugBtn');
+            if (reportBtn) {
+                reportBtn.addEventListener('click', openReportModal);
+            }
+            
+            const sendBtn = document.getElementById('sendReportBtn');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', sendBugReport);
+            }
+            
+            setInterval(checkRamadhanReal, 60000);
+            setInterval(async () => {
+                await checkMaintenance();
+                let fpx = await getFingerprint();
+                await checkBlockedUser(fpx);
+            }, 5000);
+            
+            console.log('✅ WaterTik v5.0 - Siap digunakan!');
+            console.log('✅ AI dengan Rate Limit 5 detik');
+            console.log('✅ Instagram Downloader Coming Soon!');
+        })();
+        
+        // ========================================
+        // WINDOW CLICK CLOSE MODALS
+        // ========================================
+        window.onclick = function(e) {
+            const modals = [
+                'dashboardModal', 'kontakPopup', 'premiumModal', 
+                'winnerPopup', 'banReasonPopup', 'ramadhanStartPopup',
+                'reportBugModal', 'notificationPopup'
+            ];
+            
+            modals.forEach(id => {
+                const el = document.getElementById(id);
+                if (e.target === el && el) {
+                    el.classList.remove('active');
+                }
+            });
+        };
+        
+        // ========================================
+        // EXPOSE FUNGSI KE GLOBAL
+        // ========================================
+        window.switchTab = switchTab;
+        window.downloadTikTok = downloadTikTok;
+        window.selectQuality = selectQuality;
+        window.clearTikTok = clearTikTok;
+        window.pasteLink = pasteLink;
+        window.generateThumbnail = generateThumbnail;
+        window.generateMultipleFrames = generateMultipleFrames;
+        window.downloadSingleImage = downloadSingleImage;
+        window.copyWatermarkLink = copyWatermarkLink;
+        window.downloadAllFrames = downloadAllFrames;
+        window.closeMultipleFrames = closeMultipleFrames;
+        window.handleVideoSelect = handleVideoSelect;
+        window.convertToMP3 = convertToMP3;
+        window.resetMP3 = resetMP3;
+        window.attemptLogin = attemptLogin;
+        window.claimMission = claimMission;
+        window.openDashboard = openDashboard;
+        window.closeDashboard = closeDashboard;
+        window.openKontakPopup = openKontakPopup;
+        window.closeKontakPopup = closeKontakPopup;
+        window.openPremiumModal = openPremiumModal;
+        window.closePremiumModal = closePremiumModal;
+        window.closeWinnerPopup = closeWinnerPopup;
+        window.closeBanPopup = closeBanPopup;
+        window.closeRamadhanPopup = closeRamadhanPopup;
+        window.closeNotificationPopup = closeNotificationPopup;
+        window.copyUserId = copyUserId;
         window.uploadAvatar = uploadAvatar;
         window.removeAvatar = removeAvatar;
         window.copyToClipboard = copyToClipboard;
@@ -4076,4 +4171,4 @@
         console.log('✅ All functions exposed to global scope');
     </script>
 </body>
-                                    </html>
+    </html>
