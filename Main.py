@@ -3,10 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 import os
+from dotenv import load_dotenv
+
+# Load environment variables (dari .env atau Dashboard Koyeb/Render)
+load_dotenv()
 
 app = FastAPI()
 
-# --- SETTING CORS ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,19 +18,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- MODEL AI ---
 class AIRequest(BaseModel):
     question: str
 
-# ========================================
-# ENDPOINT AI (GROQ)
-# ========================================
 @app.post("/api/ask-ai")
 async def ask_ai(data: AIRequest):
+    # AMBIL KEY DARI ENVIRONMENT VARIABLE
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     
     if not GROQ_API_KEY:
-        return {"status": "error", "message": "API Key Groq belum disetting di Render!"}
+        return {"status": "error", "message": "API Key Groq tidak ditemukan di environment!"}
     
     try:
         headers = {
@@ -59,26 +59,25 @@ async def ask_ai(data: AIRequest):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# ========================================
-# ENDPOINT TIKTOK (Download, Generator, Slide)
-# ========================================
+
 @app.get("/api/tiktok")
 async def tiktok_download(url: str):
-    TIKTOK_API_URL = os.getenv("TIKTOK_API_URL")
+    TIKTOK_API_URLS = [
+        "https://www.tikwm.com/api",
+        "https://api.tikmate.cc/api"
+    ]
     
-    if not TIKTOK_API_URL:
-        return {"status": "error", "message": "TikTok API URL belum disetting di Render!"}
-    
-    try:
-        response = requests.get(f"{TIKTOK_API_URL}?url={url}")
-        data = response.json()
-        return {"status": "success", "data": data}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    for api_url in TIKTOK_API_URLS:
+        try:
+            response = requests.get(f"{api_url}?url={url}")
+            data = response.json()
+            if data.get("code") == 0 and data.get("data"):
+                return {"status": "success", "data": data}
+        except:
+            continue
+            
+    return {"status": "error", "message": "Kedua API TikTok gagal."}
 
-# ========================================
-# CEK SERVER
-# ========================================
 @app.get("/")
 def read_root():
     return {"message": "WaterTik API is running!"}
