@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
+import httpx  # Changed from requests
 import os
 from dotenv import load_dotenv
 
@@ -46,7 +46,9 @@ async def ask_ai(data: AIRequest):
             "stream": False
         }
         
-        response = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
+        # Use async httpx client instead of requests
+        async with httpx.AsyncClient() as client:
+            response = await client.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
         
         if response.status_code != 200:
             return {"status": "error", "message": f"Error dari Groq: {response.status_code}"}
@@ -59,7 +61,6 @@ async def ask_ai(data: AIRequest):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-
 @app.get("/api/tiktok")
 async def tiktok_download(url: str):
     TIKTOK_API_URLS = [
@@ -67,14 +68,16 @@ async def tiktok_download(url: str):
         "https://api.tikmate.cc/api"
     ]
     
-    for api_url in TIKTOK_API_URLS:
-        try:
-            response = requests.get(f"{api_url}?url={url}")
-            data = response.json()
-            if data.get("code") == 0 and data.get("data"):
-                return {"status": "success", "data": data}
-        except:
-            continue
+    # Reuse the same client for multiple requests
+    async with httpx.AsyncClient() as client:
+        for api_url in TIKTOK_API_URLS:
+            try:
+                response = await client.get(f"{api_url}?url={url}")
+                data = response.json()
+                if data.get("code") == 0 and data.get("data"):
+                    return {"status": "success", "data": data}
+            except Exception: # Avoid bare 'except:'
+                continue
             
     return {"status": "error", "message": "Kedua API TikTok gagal."}
 
