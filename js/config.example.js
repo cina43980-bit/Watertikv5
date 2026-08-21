@@ -1,25 +1,23 @@
-// 🔒 API key diisi dari GitHub Secrets
-// Jangan edit file ini, nanti diisi otomatis oleh GitHub Actions
+// 🔒 Konfigurasi WaterTik API
+// Arahkan ke backend Python yang sedang jalan di HP (http://127.0.0.1:8000)
+
+const BACKEND_URL = "http://127.0.0.1:8000";
 
 const CONFIG = {
+    // Backend API yang kamu buat di Main.py
+    api: {
+        tiktok: `${BACKEND_URL}/api/tiktok`,
+        ai: `${BACKEND_URL}/api/ask-ai`
+    },
+    
+    // Tetap simpan jika ada fitur lain yang masih butuh
     firebase: {
-        apiKey: "ISI_DARI_SECRETS",
-        authDomain: "ISI_DARI_SECRETS",
-        projectId: "ISI_DARI_SECRETS",
-        storageBucket: "ISI_DARI_SECRETS",
-        messagingSenderId: "ISI_DARI_SECRETS",
-        appId: "ISI_DARI_SECRETS"
-    },
-    cerebras: {
-        apiKey: "ISI_DARI_SECRETS",
-        apiUrl: "ISI_DARI_SECRETS",
-        model: "ISI_DARI_SECRETS"
-    },
-    tiktok: {
-        apiUrl: "ISI_DARI_SECRETS"
+        apiKey: "GANTI_DENGAN_KEY_FIREBASE_KAMU",
+        authDomain: "water-tik.firebaseapp.com",
+        // ... (sisanya sesuai kebutuhanmu)
     }
 };
 
 // JANGAN UBAH KODE DI BAWAH INI!
 window.__CONFIG = CONFIG;
-console.log('⏳ Menunggu config dari GitHub Secrets...');
+console.log('✅ Konfigurasi dimuat, tersambung ke:', BACKEND_URL);
