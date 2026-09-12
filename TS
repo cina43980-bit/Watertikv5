@@ -1,0 +1,77 @@
+// ========================================
+// WaterTik API Client
+// ========================================
+
+const API_BASE = "http://127.0.0.1:8000";
+
+// ========================================
+// Generic API Request
+// ========================================
+
+export async function apiRequest<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {}),
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.detail ||
+      data?.error ||
+      "API error"
+    );
+  }
+
+  return data;
+}
+
+// ========================================
+// AI
+// ========================================
+
+export interface AIResponse {
+  answer?: string;
+  response?: string;
+  error?: string;
+}
+
+export async function askAI(
+  question: string
+): Promise<AIResponse> {
+  return apiRequest<AIResponse>("/api/ask-ai", {
+    method: "POST",
+
+    body: JSON.stringify({
+      question,
+    }),
+  });
+}
+
+// ========================================
+// TikTok
+// ========================================
+
+export interface TikTokResponse {
+  success?: boolean;
+  data?: unknown;
+  error?: string;
+}
+
+export async function downloadTikTok(
+  url: string
+): Promise<TikTokResponse> {
+  const encodedUrl = encodeURIComponent(url);
+
+  return apiRequest<TikTokResponse>(
+    `/api/tiktok?url=${encodedUrl}`
+  );
+}
