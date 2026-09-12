@@ -1,0 +1,15 @@
+- name: AI API Security Scanner
+  # You may pin to the exact commit or the version.
+  # uses: AAAjczz/ai-api-scanner@767b980be7fc4b363492b29507b6fa0c7fda45f9
+  uses: AAAjczz/ai-api-scanner@v0.5.0
+  with:
+    # Base URL of the API (e.g., https://api.example.com/v1)
+    target: 
+    # API key for authenticated tests (enables more checks)
+    api_key: # optional, default is 
+    # Specific rules to run (space-separated, default: all)
+    rules: # optional, default is 
+    # Request timeout in seconds
+    timeout: # optional, default is 10
+    # Fail the action if grade is below this (A/B/C/D/F)
+    fail_on: # optional, default is B
