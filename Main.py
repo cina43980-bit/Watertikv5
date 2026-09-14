@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -12,14 +12,27 @@ from urllib.parse import quote
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
 GROQ_API_URL = os.getenv(
     "GROQ_API_URL",
     "https://api.groq.com/openai/v1/chat/completions"
 )
+
 GROQ_MODEL = os.getenv(
     "GROQ_MODEL",
     "llama-3.1-8b-instant"
 )
+
+TIKTOK_API_URL_1 = os.getenv(
+    "TIKTOK_API_URL_1",
+    "https://www.tikwm.com/api"
+)
+
+TIKTOK_API_URL_2 = os.getenv(
+    "TIKTOK_API_URL_2",
+    "https://api.tikmate.cc/api"
+)
+
 
 # =========================
 # APP
@@ -29,6 +42,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+# =========================
+# CORS
+# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,7 +56,7 @@ app.add_middleware(
 
 
 # =========================
-# MODELS
+# REQUEST MODEL
 # =========================
 class AIRequest(BaseModel):
     question: str
@@ -47,10 +64,11 @@ class AIRequest(BaseModel):
 
 
 # =========================
-# AI
+# AI ENDPOINT
 # =========================
 @app.post("/api/ask-ai")
 async def ask_ai(data: AIRequest):
+
     if not GROQ_API_KEY:
         return {
             "status": "error",
@@ -68,7 +86,8 @@ async def ask_ai(data: AIRequest):
     system_prompt = (
         data.system_prompt
         or "Kamu adalah WaterTik AI Assistant. "
-           "Jawab dengan Bahasa Indonesia yang santai, jelas, dan membantu."
+           "Jawab dengan Bahasa Indonesia yang santai, "
+           "jelas, dan membantu."
     )
 
     headers = {
@@ -96,7 +115,10 @@ async def ask_ai(data: AIRequest):
     try:
         timeout = httpx.Timeout(30.0)
 
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        async with httpx.AsyncClient(
+            timeout=timeout
+        ) as client:
+
             response = await client.post(
                 GROQ_API_URL,
                 headers=headers,
@@ -104,6 +126,7 @@ async def ask_ai(data: AIRequest):
             )
 
         if response.status_code != 200:
+
             try:
                 error_data = response.json()
             except Exception:
@@ -157,26 +180,33 @@ async def ask_ai(data: AIRequest):
 
 
 # =========================
-# TIKTOK
+# TIKTOK ENDPOINT
 # =========================
 @app.get("/api/tiktok")
 async def tiktok_download(url: str):
+
     if not url.strip():
         return {
             "status": "error",
             "message": "URL TikTok tidak boleh kosong."
         }
 
+    encoded_url = quote(
+        url.strip(),
+        safe=""
+    )
+
     tiktok_api_urls = [
-        os.getenv("TIKTOK_API_URL_1", "https://www.tikwm.com/api"),
-        os.getenv("TIKTOK_API_URL_2", "https://api.tikmate.cc/api")
+        TIKTOK_API_URL_1,
+        TIKTOK_API_URL_2
     ]
 
-    encoded_url = quote(url.strip(), safe="")
-
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(
+        timeout=30.0
+    ) as client:
 
         for api_url in tiktok_api_urls:
+
             try:
                 response = await client.get(
                     f"{api_url}?url={encoded_url}"
@@ -187,7 +217,10 @@ async def tiktok_download(url: str):
 
                 data = response.json()
 
-                if data.get("code") == 0 and data.get("data"):
+                if (
+                    data.get("code") == 0
+                    and data.get("data")
+                ):
                     return {
                         "status": "success",
                         "data": data
@@ -203,18 +236,23 @@ async def tiktok_download(url: str):
 
 
 # =========================
-# HEALTH CHECK
+# ROOT
 # =========================
 @app.get("/")
 async def read_root():
+
     return {
         "status": "success",
         "message": "WaterTik API is running!"
     }
 
 
+# =========================
+# HEALTH CHECK
+# =========================
 @app.get("/health")
 async def health():
+
     return {
         "status": "ok"
     }
