@@ -22,7 +22,12 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9783625787750233" crossorigin="anonymous"></script>
     
     <!-- Config - API Key dari environment -->
-    <script src="js/config.js"></script>
+    <script>
+/* WaterTik single-file config. AI/TikTok secrets stay on backend. */
+window.__CONFIG = window.__CONFIG || {};
+window.__CONFIG.apiBase = window.__CONFIG.apiBase || 'http://127.0.0.1:8000';
+window.__CONFIG.firebase = window.__CONFIG.firebase || {};
+</script>
     
     <style>
         /* ========================================
@@ -340,7 +345,6 @@
         .btn-outline {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
         }
         
         .btn-premium {
@@ -2024,7 +2028,7 @@
             <div class="card">
                 <h2>
                     <i class="fas fa-robot"></i> AI Helper
-                    <span style="font-size: 11px; margin-left: 10px; background: var(--accent); color: #1a1a2e; padding: 2px 12px; border-radius: 20px;">Powered by Python Lokal</span>
+                    <span style="font-size: 11px; margin-left: 10px; background: var(--accent); color: #1a1a2e; padding: 2px 12px; border-radius: 20px;">Powered by Cerebras AI</span>
                 </h2>
                 
                 <!-- Rate Limit Info -->
@@ -2332,7 +2336,7 @@
                     <div class="info-item"><i class="fas fa-user"></i> <span>Creator: Fikri</span></div>
                     <div class="info-item"><i class="fas fa-calendar"></i> <span>Ramadhan 2026</span></div>
                     <div class="info-item"><i class="fas fa-shield-alt"></i> <span>Keamanan: 100%</span></div>
-                    <div class="info-item"><i class="fas fa-robot"></i> <span>AI: Python Lokal Server</span></div>
+                    <div class="info-item"><i class="fas fa-robot"></i> <span>AI: Cerebras AI</span></div>
                     <div class="info-item"><i class="fas fa-moon"></i> <span>Status: <span id="ramadhanInfoStatus">-</span></span></div>
                     <div class="info-item"><i class="fab fa-whatsapp"></i> <span>Admin: 089699024654</span></div>
                 </div>
@@ -2530,18 +2534,17 @@
     </div>
     
     <!-- ========================================
-         JAVASCRIPT - DI DALAM HTML
+         JAVASCRIPT - DI DALAM HTML (TANPA API KEY)
     ======================================== -->
     <script>
         // ================================================================
-        // 📦 JAVASCRIPT WATER TIK - FULL (MENGGUNAKAN API LOKAL PYTHON)
+        // 📦 JAVASCRIPT WATER TIK - FULL (API KEY DARI CONFIG)
         // ================================================================
         
         console.log('🔍 Checking config...');
         
         // Ambil config yang sudah di-load
         const CONFIG = window.__CONFIG || {};
-        const LOCAL_API = "http://127.0.0.1:8000"; // LINK KE SERVER PYTHON TERMUX KAMU
         
         // ========================================
         // INISIALISASI FIREBASE
@@ -2560,6 +2563,44 @@
         } catch (e) {
             console.error('❌ Gagal inisialisasi Firebase:', e.message);
         }
+        
+        // ========================================
+        // KONFIGURASI API — TANPA SECRET DI BROWSER
+        // ========================================
+        // Semua API rahasia dipanggil melalui backend FastAPI.
+        // Firebase web config boleh tetap client-side.
+        const API_BASE = (CONFIG?.apiBase || 'http://127.0.0.1:8000').replace(/\/$/, '');
+        
+        // ========================================
+        // SISTEM PROMPT AI
+        // ========================================
+        const AI_SYSTEM_PROMPT = `Kamu adalah WaterTik AI Assistant, asisten AI yang cerdas, ramah, dan membantu.
+        
+        Kemampuanmu:
+        - Mengobrol santai seperti manusia
+        - Menjawab pertanyaan umum
+        - Memberikan jokes dan hiburan
+        - Menjadi teman curhat yang suportif
+        - Membantu belajar sekolah (Matematika, IPA, Bahasa Indonesia, dll)
+        - Membantu coding HTML, CSS, JavaScript, Python, PHP, dll
+        - Membantu membuat website dan aplikasi
+        - Memberikan tips keuangan dan pengelolaan uang
+        - Menjelaskan investasi, saham, emas, dan ekonomi secara umum
+        - Membantu membuat rencana tabungan
+        - Menjelaskan teknologi dan AI
+        - Membantu penggunaan website WaterTik
+        
+        Aturan:
+        - Jawab dengan Bahasa Indonesia yang natural.
+        - Ramah, sopan, dan mudah dipahami.
+        - Jika tidak tahu sesuatu, katakan dengan jujur.
+        - Jangan mengarang data atau berita terbaru.
+        
+        Gaya bicara:
+        - Santai saat diajak santai.
+        - Serius saat membahas pelajaran atau keuangan.
+        - Bisa bercanda jika diminta.
+        - Gunakan emoji untuk membuat obrolan lebih hidup.`;
         
         // ========================================
         // VARIABEL GLOBAL
@@ -3228,39 +3269,36 @@
         }
         
         // ========================================
-        // API TIKTOK - MENGGUNAKAN SERVER PYTHON LOKAL
+        // API TIKTOK
         // ========================================
         const VIDEO_APIS = [{
             handler: async (url) => {
                 try {
-                    // MEMANGGIL API PYTHON TERMUX KAMU
-                    let res = await fetch(`${LOCAL_API}/api/tiktok?url=${encodeURIComponent(url)}`);
+                    let res = await fetch(`${API_BASE}/api/tiktok?url=${encodeURIComponent(url)}`);
                     let data = await res.json();
-                    
-                    // Membaca status JSON dari Python kamu
-                    if (data.status === "success" && data.data) {
-                        let d = data.data.data || data.data; // Mengambil data utama
+                    if (data.status === 'success' && data.data?.code === 0 && data.data?.data) {
+                        data = data.data;
                         let upload = '-';
-                        if (d.create_time) {
-                            let dt = new Date(d.create_time * 1000);
-                            upload = dt.toLocaleDateString('id-ID');
+                        if (data.data.create_time) {
+                            let d = new Date(data.data.create_time * 1000);
+                            upload = d.toLocaleDateString('id-ID');
                         }
                         return {
                             success: true,
-                            hdUrl: d.hdplay || d.play,
-                            sdUrl: d.play,
-                            title: d.title || 'TikTok Video',
-                            author: d.author?.nickname || '@user',
-                            duration: formatDuration(d.duration || 0),
-                            thumbnail: d.cover,
-                            size: d.size ? (d.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
-                            images: d.images || [],
+                            hdUrl: data.data.hdplay || data.data.play,
+                            sdUrl: data.data.play,
+                            title: data.data.title || 'TikTok Video',
+                            author: data.data.author?.nickname || '@user',
+                            duration: formatDuration(data.data.duration || 0),
+                            thumbnail: data.data.cover,
+                            size: data.data.size ? (data.data.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
+                            images: data.data.images || [],
                             uploadDate: upload
                         };
                     }
                     return null;
                 } catch (e) {
-                    console.error('TikTok API Error (Local):', e);
+                    console.error('TikTok API Error:', e);
                     return null;
                 }
             }
@@ -3315,7 +3353,7 @@
                 await updateMissionStats('video');
                 showToast('✅ Video siap!');
             } else {
-                showToast('❌ Gagal terhubung ke API Termux / Link salah.');
+                showToast('❌ Gagal ambil video. Coba link lain.');
             }
             
             if (loading) loading.style.display = 'none';
@@ -3636,7 +3674,7 @@
         }
         
         // ========================================
-        // AI HELPER - MENGGUNAKAN SERVER PYTHON LOKAL
+        // AI HELPER
         // ========================================
         function addAIMessage(msg, type) {
             const container = document.getElementById('aiChatContainer');
@@ -3712,6 +3750,11 @@
                 return;
             }
             
+            if (!API_BASE) {
+                showToast('❌ Backend API tidak dikonfigurasi!');
+                return;
+            }
+            
             const now = Date.now();
             const timeSinceLast = now - lastRequestTime;
             
@@ -3735,19 +3778,32 @@
             try {
                 lastRequestTime = Date.now();
                 
-                // MENGIRIM PERMINTAAN KE API PYTHON LOKAL
-                const response = await fetch(`${LOCAL_API}/api/ask-ai`, {
+                const response = await fetch(`${API_BASE}/api/ask-ai`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
                     },
-                    body: JSON.stringify({ question: question })
+                    body: JSON.stringify({
+                        question,
+                        system_prompt: AI_SYSTEM_PROMPT
+                    })
                 });
                 
                 hideTypingIndicator();
                 
                 if (!response.ok) {
-                    addAIMessage('Maaf, server Python (Termux) menolak permintaan atau terjadi error.', 'bot');
+                    let errorMsg = 'Maaf, ada masalah. ';
+                    if (response.status === 429) {
+                        errorMsg += 'Terlalu banyak request. Tunggu 5 detik lalu coba lagi.';
+                    } else if (response.status === 401) {
+                        errorMsg += 'API Key tidak valid.';
+                    } else if (response.status === 500) {
+                        errorMsg += 'Server AI sibuk. Coba lagi nanti.';
+                    } else {
+                        errorMsg += `Error ${response.status}.`;
+                    }
+                    addAIMessage(errorMsg, 'bot');
                     showToast('❌ Gagal');
                     isRequesting = false;
                     disableAIInputs(false);
@@ -3756,18 +3812,16 @@
                 
                 const data = await response.json();
                 
-                // Membaca format JSON dari Python kamu
-                if (data.status === "success") {
-                    const aiResponse = data.response;
-                    addAIMessage(aiResponse, 'bot');
+                if (data?.status === 'success' && data?.response) {
+                    addAIMessage(data.response, 'bot');
                 } else {
-                    addAIMessage('Waduh, ada error dari Python: ' + data.message, 'bot');
+                    addAIMessage(data?.message || 'Format respons tidak dikenali. Coba lagi.', 'bot');
                 }
                 
             } catch (error) {
                 hideTypingIndicator();
                 console.error('AI Error:', error);
-                addAIMessage('❌ Gagal terhubung ke API Lokal. Pastikan Termux dan Uvicorn masih berjalan!', 'bot');
+                addAIMessage('❌ Gagal terhubung ke AI. Cek koneksi internet.', 'bot');
                 showToast('❌ Gagal konek');
             }
             
@@ -3999,7 +4053,7 @@
         // INIT
         // ========================================
         (async function init() {
-            console.log('🚀 WaterTik v5.0 - Starting (Local Edition)...');
+            console.log('🚀 WaterTik v5.0 - Starting...');
             
             await getFingerprint();
             await checkMaintenance();
@@ -4036,7 +4090,9 @@
                 await checkBlockedUser(fpx);
             }, 5000);
             
-            console.log('✅ WaterTik v5.0 - Siap digunakan dengan Python Lokal!');
+            console.log('✅ WaterTik v5.0 - Siap digunakan!');
+            console.log('✅ AI dengan Rate Limit 5 detik');
+            console.log('✅ Instagram Downloader Coming Soon!');
         })();
         
         // ========================================
