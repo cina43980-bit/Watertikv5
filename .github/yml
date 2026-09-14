@@ -1,0 +1,21 @@
+name: Deploy WaterTik
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        env:
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          printf 'CEREBRAS_API_KEY=%s\n' "$CEREBRAS_API_KEY" > .env
+          printf 'GROQ_API_KEY=%s\n' "$GROQ_API_KEY" >> .env
