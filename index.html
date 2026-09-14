@@ -23,11 +23,21 @@
     
     <!-- Config - API Key dari environment -->
     <script>
-/* WaterTik single-file config. AI/TikTok secrets stay on backend. */
-window.__CONFIG = window.__CONFIG || {};
-window.__CONFIG.apiBase = window.__CONFIG.apiBase || 'http://127.0.0.1:8000';
-window.__CONFIG.firebase = window.__CONFIG.firebase || {};
-</script>
+        // WaterTik single-file configuration.
+        // AI/TikTok secrets are NEVER stored in this HTML; they stay on the backend.
+        // Replace the Firebase public config below with your Firebase Web App config.
+        window.__CONFIG = {
+            apiBase: 'http://127.0.0.1:8000',
+            firebase: {
+                apiKey: 'ISI_FIREBASE_WEB_API_KEY',
+                authDomain: 'watertik-466a0.firebaseapp.com',
+                projectId: 'watertik-466a0',
+                storageBucket: 'watertik-466a0.firebasestorage.app',
+                messagingSenderId: 'ISI_MESSAGING_SENDER_ID',
+                appId: 'ISI_FIREBASE_APP_ID'
+            }
+        };
+    </script>
     
     <style>
         /* ========================================
