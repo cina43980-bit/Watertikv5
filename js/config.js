@@ -8,9 +8,9 @@ const CONFIG = {
     appId: '1:477111819819:web:09626fc68a93f6b372146e'
   },
   cerebras: {
-    apiKey: 'csk-xvn333y8eyfyvc93kv44xdrxpxwf65h6tyn3de34vxf9nfy9',
-    apiUrl: 'https://api.cerebras.ai/v1/chat/completions',
-    model: ' zai-glm-4.7'
+    apiKey: '',
+    apiUrl: '',
+    model: ''
   },
   tiktok: {
     apiUrl: 'https://www.tikwm.com/api/'

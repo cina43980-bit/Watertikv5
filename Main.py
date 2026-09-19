@@ -4,13 +4,13 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 import httpx
 import os
-from urllib.parse import quote
 
 # =========================
 # ENVIRONMENT
 # =========================
 load_dotenv()
 
+# ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 GROQ_API_URL = os.getenv(
@@ -23,15 +23,11 @@ GROQ_MODEL = os.getenv(
     "llama-3.1-8b-instant"
 )
 
-TIKTOK_API_URL_1 = os.getenv(
-    "TIKTOK_API_URL_1",
-    "https://www.tikwm.com/api"
-)
-
-TIKTOK_API_URL_2 = os.getenv(
-    "TIKTOK_API_URL_2",
-    "https://api.tikmate.cc/api"
-)
+# ---------- RAPIDAPI ----------
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
+RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "")
+RAPIDAPI_URL = os.getenv("RAPIDAPI_URL", "")
+RAPIDAPI_PARAM = os.getenv("RAPIDAPI_PARAM", "url")
 
 
 # =========================
@@ -39,7 +35,7 @@ TIKTOK_API_URL_2 = os.getenv(
 # =========================
 app = FastAPI(
     title="WaterTik API",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 
@@ -113,10 +109,8 @@ async def ask_ai(data: AIRequest):
     }
 
     try:
-        timeout = httpx.Timeout(30.0)
-
         async with httpx.AsyncClient(
-            timeout=timeout
+            timeout=30.0
         ) as client:
 
             response = await client.post(
@@ -180,7 +174,7 @@ async def ask_ai(data: AIRequest):
 
 
 # =========================
-# TIKTOK ENDPOINT
+# TIKTOK RAPIDAPI
 # =========================
 @app.get("/api/tiktok")
 async def tiktok_download(url: str):
@@ -191,48 +185,79 @@ async def tiktok_download(url: str):
             "message": "URL TikTok tidak boleh kosong."
         }
 
-    encoded_url = quote(
-        url.strip(),
-        safe=""
-    )
+    if not RAPIDAPI_KEY:
+        return {
+            "status": "error",
+            "message": "RAPIDAPI_KEY belum diset."
+        }
 
-    tiktok_api_urls = [
-        TIKTOK_API_URL_1,
-        TIKTOK_API_URL_2
-    ]
+    if not RAPIDAPI_HOST:
+        return {
+            "status": "error",
+            "message": "RAPIDAPI_HOST belum diset."
+        }
 
-    async with httpx.AsyncClient(
-        timeout=30.0
-    ) as client:
+    if not RAPIDAPI_URL:
+        return {
+            "status": "error",
+            "message": "RAPIDAPI_URL belum diset."
+        }
 
-        for api_url in tiktok_api_urls:
-
-            try:
-                response = await client.get(
-                    f"{api_url}?url={encoded_url}"
-                )
-
-                if response.status_code != 200:
-                    continue
-
-                data = response.json()
-
-                if (
-                    data.get("code") == 0
-                    and data.get("data")
-                ):
-                    return {
-                        "status": "success",
-                        "data": data
-                    }
-
-            except Exception:
-                continue
-
-    return {
-        "status": "error",
-        "message": "Kedua API TikTok gagal."
+    headers = {
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": RAPIDAPI_HOST
     }
+
+    params = {
+        RAPIDAPI_PARAM: url.strip()
+    }
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=30.0
+        ) as client:
+
+            response = await client.get(
+                RAPIDAPI_URL,
+                headers=headers,
+                params=params
+            )
+
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+
+        if response.status_code != 200:
+            return {
+                "status": "error",
+                "message": "RapidAPI gagal.",
+                "code": response.status_code,
+                "detail": data
+            }
+
+        return {
+            "status": "success",
+            "data": data
+        }
+
+    except httpx.TimeoutException:
+        return {
+            "status": "error",
+            "message": "RapidAPI timeout."
+        }
+
+    except httpx.HTTPError as e:
+        return {
+            "status": "error",
+            "message": f"RapidAPI HTTP error: {str(e)}"
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Server error: {str(e)}"
+        }
 
 
 # =========================
@@ -254,5 +279,7 @@ async def read_root():
 async def health():
 
     return {
-        "status": "ok"
+        "status": "ok",
+        "groq": bool(GROQ_API_KEY),
+        "rapidapi": bool(RAPIDAPI_KEY)
     }
