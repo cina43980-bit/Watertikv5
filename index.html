@@ -22,23 +22,6 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9783625787750233" crossorigin="anonymous"></script>
     
     <!-- Config - API Key dari environment -->
-    <script>
-        // WaterTik single-file configuration.
-        // AI/TikTok secrets are NEVER stored in this HTML; they stay on the backend.
-        // Replace the Firebase public config below with your Firebase Web App config.
-        window.__CONFIG = {
-            apiBase: 'http://127.0.0.1:8000',
-            firebase: {
-                apiKey: 'ISI_FIREBASE_WEB_API_KEY',
-                authDomain: 'watertik-466a0.firebaseapp.com',
-                projectId: 'watertik-466a0',
-                storageBucket: 'watertik-466a0.firebasestorage.app',
-                messagingSenderId: 'ISI_MESSAGING_SENDER_ID',
-                appId: 'ISI_FIREBASE_APP_ID'
-            }
-        };
-    </script>
-    
     <style>
         /* ========================================
            GLOBAL STYLES & RESET
@@ -2575,11 +2558,13 @@
         }
         
         // ========================================
-        // KONFIGURASI API — TANPA SECRET DI BROWSER
+        // KONFIGURASI API
         // ========================================
-        // Semua API rahasia dipanggil melalui backend FastAPI.
-        // Firebase web config boleh tetap client-side.
-        const API_BASE = (CONFIG?.apiBase || 'http://127.0.0.1:8000').replace(/\/$/, '');
+        const API_BASE = (window.WATERTIK_API_BASE || window.location.origin).replace(/\/$/, '');
+        
+        }
+        
+        }
         
         // ========================================
         // SISTEM PROMPT AI
@@ -3284,29 +3269,23 @@
         const VIDEO_APIS = [{
             handler: async (url) => {
                 try {
-                    let res = await fetch(`${API_BASE}/api/tiktok?url=${encodeURIComponent(url)}`);
-                    let data = await res.json();
-                    if (data.status === 'success' && data.data?.code === 0 && data.data?.data) {
-                        data = data.data;
-                        let upload = '-';
-                        if (data.data.create_time) {
-                            let d = new Date(data.data.create_time * 1000);
-                            upload = d.toLocaleDateString('id-ID');
-                        }
-                        return {
-                            success: true,
-                            hdUrl: data.data.hdplay || data.data.play,
-                            sdUrl: data.data.play,
-                            title: data.data.title || 'TikTok Video',
-                            author: data.data.author?.nickname || '@user',
-                            duration: formatDuration(data.data.duration || 0),
-                            thumbnail: data.data.cover,
-                            size: data.data.size ? (data.data.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
-                            images: data.data.images || [],
-                            uploadDate: upload
-                        };
-                    }
-                    return null;
+                    const res = await fetch(`${API_BASE}/api/tiktok?url=${encodeURIComponent(url)}`);
+                    const result = await res.json();
+                    if (result.status !== 'success' || !result.data?.data) return null;
+                    const data = result.data.data;
+                    const upload = data.create_time ? new Date(data.create_time * 1000).toLocaleDateString('id-ID') : '-';
+                    return {
+                        success: true,
+                        hdUrl: data.hdplay || data.play,
+                        sdUrl: data.play,
+                        title: data.title || 'TikTok Video',
+                        author: data.author?.nickname || '@user',
+                        duration: formatDuration(data.duration || 0),
+                        thumbnail: data.cover,
+                        size: data.size ? (data.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
+                        images: data.images || [],
+                        uploadDate: upload
+                    };
                 } catch (e) {
                     console.error('TikTok API Error:', e);
                     return null;
@@ -3759,13 +3738,7 @@
                 showToast('Masukkan pertanyaan dulu!');
                 return;
             }
-            
-            if (!API_BASE) {
-                showToast('❌ Backend API tidak dikonfigurasi!');
-                return;
-            }
-            
-            const now = Date.now();
+const now = Date.now();
             const timeSinceLast = now - lastRequestTime;
             
             if (timeSinceLast < MIN_INTERVAL) {
@@ -3790,12 +3763,9 @@
                 
                 const response = await fetch(`${API_BASE}/api/ask-ai`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': csrfToken
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        question,
+                        question: question,
                         system_prompt: AI_SYSTEM_PROMPT
                     })
                 });
@@ -3822,10 +3792,15 @@
                 
                 const data = await response.json();
                 
-                if (data?.status === 'success' && data?.response) {
-                    addAIMessage(data.response, 'bot');
+                if (data && data.status === 'success') {
+                    const aiResponse = data.response;
+                    if (aiResponse && aiResponse.trim().length > 0) {
+                        addAIMessage(aiResponse, 'bot');
+                    } else {
+                        addAIMessage('Hmm, coba tanyakan hal lain ya! 😊', 'bot');
+                    }
                 } else {
-                    addAIMessage(data?.message || 'Format respons tidak dikenali. Coba lagi.', 'bot');
+                    addAIMessage('Format respons tidak dikenali. Coba lagi.', 'bot');
                 }
                 
             } catch (error) {
