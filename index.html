@@ -1788,6 +1788,25 @@
                         <span class="result-title"><i class="fas fa-check-circle"></i> Video Siap Diunduh!</span>
                         <span class="result-badge" style="background: var(--accent); padding: 5px 12px; border-radius: 20px;">HD Quality</span>
                     </div>
+                    <div id="tiktokProfile" style="display:none; margin-bottom:20px; padding:15px; border:1px solid var(--border); border-radius:14px; background:rgba(255,255,255,.04);">
+                        <div style="display:flex; gap:14px; align-items:center;">
+                            <img id="profileAvatar" src="" alt="Avatar" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);">
+                            <div style="min-width:0;flex:1;">
+                                <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;"><strong id="profileNickname">-</strong><span id="profileVerified" style="display:none;color:#00f2fe;"><i class="fas fa-check-circle"></i></span></div>
+                                <div id="profileUsername" style="color:#aaa;">@-</div>
+                                <div id="profileBio" style="margin-top:6px;color:#ccc;font-size:13px;white-space:pre-line;"></div>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px;text-align:center;">
+                            <div><strong id="profileFollowing">-</strong><small style="display:block;color:#aaa;">Following</small></div>
+                            <div><strong id="profileFollowers">-</strong><small style="display:block;color:#aaa;">Followers</small></div>
+                            <div><strong id="profileLikes">-</strong><small style="display:block;color:#aaa;">Likes</small></div>
+                            <div><strong id="profileVideos">-</strong><small style="display:block;color:#aaa;">Videos</small></div>
+                            <div><strong id="profileFriends">-</strong><small style="display:block;color:#aaa;">Friends</small></div>
+                        </div>
+                        <div id="profileMeta" style="margin-top:10px;color:#999;font-size:12px;"></div>
+                    </div>
+
                     <div class="video-preview">
                         <div class="thumbnail">
                             <img id="videoThumb" src="">
@@ -3284,7 +3303,8 @@
                         thumbnail: data.cover,
                         size: data.size ? (data.size / 1024 / 1024).toFixed(1) + ' MB' : '~15 MB',
                         images: data.images || [],
-                        uploadDate: upload
+                        uploadDate: upload,
+                        profile: data.user || null
                     };
                 } catch (e) {
                     console.error('TikTok API Error:', e);
@@ -3293,6 +3313,16 @@
             }
         }];
         
+        function formatCount(value) {
+            if (value === null || value === undefined || value === '') return '-';
+            const n = Number(value);
+            if (!Number.isFinite(n)) return String(value);
+            if (n >= 1000000000) return (n / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+            if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return n.toLocaleString('id-ID');
+        }
+
         async function downloadTikTok() {
             const urlInput = document.getElementById('tiktokUrl');
             if (!urlInput) {
@@ -3336,6 +3366,31 @@
                 if (duration) duration.innerText = videoData.duration;
                 if (size) size.innerText = videoData.size;
                 if (link) link.href = videoData.hdUrl;
+
+                const profileBox = document.getElementById('tiktokProfile');
+                const profile = videoData.profile;
+                if (profile && profileBox) {
+                    profileBox.style.display = 'block';
+                    const avatar = document.getElementById('profileAvatar');
+                    const nickname = document.getElementById('profileNickname');
+                    const username = document.getElementById('profileUsername');
+                    const bio = document.getElementById('profileBio');
+                    const verified = document.getElementById('profileVerified');
+                    const stats = profile.stats || {};
+                    if (avatar) { avatar.src = profile.avatar || videoData.thumbnail || ''; avatar.style.display = (profile.avatar || videoData.thumbnail) ? 'block' : 'none'; }
+                    if (nickname) nickname.innerText = profile.nickname || videoData.author || '-';
+                    if (username) username.innerText = profile.username ? '@' + String(profile.username).replace(/^@/, '') : '';
+                    if (bio) bio.innerText = profile.bio || '';
+                    if (verified) verified.style.display = profile.verified ? 'inline' : 'none';
+                    document.getElementById('profileFollowing').innerText = formatCount(stats.following);
+                    document.getElementById('profileFollowers').innerText = formatCount(stats.followers);
+                    document.getElementById('profileLikes').innerText = formatCount(stats.likes);
+                    document.getElementById('profileVideos').innerText = formatCount(stats.videos);
+                    document.getElementById('profileFriends').innerText = formatCount(stats.friends);
+                    document.getElementById('profileMeta').innerText = [profile.region ? 'Region: ' + profile.region : '', profile.language ? 'Language: ' + profile.language : ''].filter(Boolean).join(' • ');
+                } else if (profileBox) {
+                    profileBox.style.display = 'none';
+                }
                 if (result) result.classList.add('active');
                 
                 await updateDownloadStats();
