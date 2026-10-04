@@ -1,0 +1,38 @@
+name: WaterTik Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+      RAPIDAPI_HOST: ${{ secrets.RAPIDAPI_HOST }}
+      RAPIDAPI_URL: ${{ secrets.RAPIDAPI_URL }}
+      RAPIDAPI_PARAM: url
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install fastapi uvicorn httpx python-dotenv pydantic
+
+      - name: Check environment
+        run: |
+          python -c "import os; print('GROQ:', bool(os.getenv('GROQ_API_KEY'))); print('RAPIDAPI:', bool(os.getenv('RAPIDAPI_KEY')))"
+
+      - name: Check Main.py
+        run: |
+          python -m py_compile main.py
